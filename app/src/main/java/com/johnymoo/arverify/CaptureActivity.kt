@@ -156,16 +156,24 @@ class CaptureActivity : AppCompatActivity(), GLSurfaceView.Renderer {
                 runOnUiThread { toast("深度数据未就绪，请对准物体后重试") }
             }
 
-            frame.acquirePointCloud().use { pc ->
-                val buf = pc.points
-                val arr = FloatArray(buf.remaining())
-                buf.get(arr)
-                val ply = File(dir, "points_$stamp.ply")
-                ply.writeText(PlyWriter.toAsciiPly(arr))
-                saved.add(ply.name)
+            try {
+                frame.acquirePointCloud().use { pc ->
+                    val buf = pc.points
+                    val arr = FloatArray(buf.remaining())
+                    buf.get(arr)
+                    val ply = File(dir, "points_$stamp.ply")
+                    ply.writeText(PlyWriter.toAsciiPly(arr))
+                    saved.add(ply.name)
+                }
+            } catch (e: NotYetAvailableException) {
+                runOnUiThread { toast("点云数据未就绪") }
             }
 
-            runOnUiThread { toast("已保存：${saved.joinToString(" , ")}") }
+            if (saved.isNotEmpty()) {
+                runOnUiThread { toast("已保存：${saved.joinToString(" , ")}") }
+            } else {
+                runOnUiThread { toast("采集失败：深度和点云数据均未就绪，请对准物体后重试") }
+            }
         } catch (e: Exception) {
             runOnUiThread { toast("采集失败：${e.javaClass.simpleName}") }
         }

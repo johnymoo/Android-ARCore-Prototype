@@ -54,11 +54,11 @@ class CapabilityChecker(private val context: Context) {
             ArCoreApk.Availability.UNKNOWN_CHECKING,
             ArCoreApk.Availability.UNKNOWN_ERROR,
             ArCoreApk.Availability.UNKNOWN_TIMED_OUT ->
-                notes.add("ARCore 可用性尚未确定（$availability），请再次点击"检查 ARCore"。")
+                notes.add("ARCore 可用性尚未确定（$availability），请再次点击「检查 ARCore」。")
             else -> {}
         }
         if (status == ArCoreStatus.SUPPORTED_NOT_INSTALLED) {
-            notes.add("若安装失败：可从 OPPO 应用商店或侧载安装 "Google Play Services for AR"。")
+            notes.add("若安装失败：可从 OPPO 应用商店或侧载安装「Google Play Services for AR」。")
         }
 
         val route = RecommendedRoute.decide(
