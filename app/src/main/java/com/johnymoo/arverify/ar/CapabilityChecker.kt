@@ -47,7 +47,7 @@ class CapabilityChecker(private val context: Context) {
         val notes = mutableListOf<String>()
 
         val depth = if (status == ArCoreStatus.SUPPORTED_INSTALLED) probeDepth()
-        else DepthSupport(false, false, "ARCore 未安装，未探测 Depth")
+        else DepthSupport(false, false, depthProbeSkippedNote(status))
         depth.note?.let { notes.add(it) }
 
         when (availability) {
@@ -69,7 +69,7 @@ class CapabilityChecker(private val context: Context) {
             deviceInfo = deviceInfo,
             arcoreStatus = status,
             depthAutomaticSupported = depth.automatic,
-            rawDepthSupported = depth.raw,
+            rawDepthSupported = depth.rawDepth,
             recommendedRoute = route,
             notes = notes,
             timestampIso = nowIso(),
@@ -86,4 +86,14 @@ class CapabilityChecker(private val context: Context) {
 
     private fun nowIso(): String =
         SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).format(Date())
+
+    companion object {
+        fun depthProbeSkippedNote(status: ArCoreStatus): String = when (status) {
+            ArCoreStatus.SUPPORTED_NOT_INSTALLED -> "ARCore 未安装，未探测 Depth"
+            ArCoreStatus.SUPPORTED_APK_TOO_OLD -> "Google Play Services for AR 版本过旧，未探测 Depth"
+            ArCoreStatus.UNSUPPORTED -> "设备不支持 ARCore，未探测 Depth"
+            ArCoreStatus.UNKNOWN -> "ARCore 状态未知，未探测 Depth"
+            ArCoreStatus.SUPPORTED_INSTALLED -> "ARCore 已安装，未探测 Depth"
+        }
+    }
 }
