@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">原型验证工具</string>
+    <string name="title">原型验证工具</string>
+    <string name="btn_check_arcore">检查 ARCore</string>
+    <string name="btn_check_depth">检查 Depth API</string>
+    <string name="btn_capture">开始采集</string>
+    <string name="btn_export">导出结果</string>
+    <string name="section_result">当前检测结果</string>
+    <string name="supported">支持</string>
+    <string name="not_supported">不支持</string>
+    <!-- %1$s is replaced with 支持 / 不支持 or the route label -->
+    <string name="status_arcore">ARCore：%1$s</string>
+    <string name="status_depth">Depth：%1$s</string>
+    <string name="status_route">推荐路线：%1$s</string>
+    <string name="capture_tips">光线均匀 · 背景简洁 · 保留尺子/标记 · 正面/侧面/顶面/斜角 · 每次 1~3 个零件</string>
+    <string name="btn_shutter">拍摄</string>
+    <string name="btn_done">完成</string>
+</resources>
