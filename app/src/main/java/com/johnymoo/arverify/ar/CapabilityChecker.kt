@@ -34,7 +34,7 @@ class CapabilityChecker(private val context: Context) {
             val raw = session.isDepthModeSupported(Config.DepthMode.RAW_DEPTH_ONLY)
             DepthSupport(auto, raw, null)
         } catch (e: Exception) {
-            DepthSupport(false, false, "Depth probe failed: ${e.javaClass.simpleName}")
+            DepthSupport(false, false, depthProbeFailureNote(e))
         } finally {
             session?.close()
         }
@@ -94,6 +94,11 @@ class CapabilityChecker(private val context: Context) {
             ArCoreStatus.UNSUPPORTED -> "设备不支持 ARCore，未探测 Depth"
             ArCoreStatus.UNKNOWN -> "ARCore 状态未知，未探测 Depth"
             ArCoreStatus.SUPPORTED_INSTALLED -> "ARCore 已安装，未探测 Depth"
+        }
+
+        fun depthProbeFailureNote(error: Exception): String = when (error) {
+            is SecurityException -> "需要相机权限才能探测 Depth API"
+            else -> "Depth probe failed: ${error.javaClass.simpleName}"
         }
     }
 }

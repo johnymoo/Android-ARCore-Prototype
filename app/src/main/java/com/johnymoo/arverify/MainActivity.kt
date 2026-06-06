@@ -20,10 +20,21 @@ class MainActivity : AppCompatActivity() {
     private lateinit var checker: CapabilityChecker
     private lateinit var exporter: ReportExporter
     private var lastReport: CapabilityReport? = null
+    private var pendingCameraPermissionPurpose = CameraPermissionPurpose.CAPTURE
 
     private val cameraPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { granted -> if (granted) launchCapture() else toast("需要相机权限才能采集") }
+    ) { granted ->
+        val purpose = pendingCameraPermissionPurpose
+        if (granted) {
+            when (purpose) {
+                CameraPermissionPurpose.CHECK_DEPTH -> refreshReport()
+                CameraPermissionPurpose.CAPTURE -> launchCapture()
+            }
+        } else {
+            toast(purpose.deniedToast)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +44,7 @@ class MainActivity : AppCompatActivity() {
         exporter = ReportExporter(this)
 
         binding.btnCheckArcore.setOnClickListener { checkArcore() }
-        binding.btnCheckDepth.setOnClickListener { refreshReport() }
+        binding.btnCheckDepth.setOnClickListener { onCheckDepthClicked() }
         binding.btnCapture.setOnClickListener { onCaptureClicked() }
         binding.btnExport.setOnClickListener { onExportClicked() }
     }
@@ -73,11 +84,14 @@ class MainActivity : AppCompatActivity() {
         binding.tvNotes.text = r.notes.joinToString("\n")
     }
 
+    private fun onCheckDepthClicked() {
+        if (hasCameraPermission()) refreshReport()
+        else requestCameraPermission(CameraPermissionPurpose.CHECK_DEPTH)
+    }
+
     private fun onCaptureClicked() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-            == PackageManager.PERMISSION_GRANTED
-        ) launchCapture()
-        else cameraPermission.launch(Manifest.permission.CAMERA)
+        if (hasCameraPermission()) launchCapture()
+        else requestCameraPermission(CameraPermissionPurpose.CAPTURE)
     }
 
     private fun launchCapture() = startActivity(Intent(this, CaptureActivity::class.java))
@@ -89,5 +103,19 @@ class MainActivity : AppCompatActivity() {
         toast("已写入：${files.joinToString(" , ") { it.name }}")
     }
 
+    private fun hasCameraPermission(): Boolean =
+        ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) ==
+            PackageManager.PERMISSION_GRANTED
+
+    private fun requestCameraPermission(purpose: CameraPermissionPurpose) {
+        pendingCameraPermissionPurpose = purpose
+        cameraPermission.launch(Manifest.permission.CAMERA)
+    }
+
     private fun toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+}
+
+enum class CameraPermissionPurpose(val deniedToast: String) {
+    CHECK_DEPTH("需要相机权限才能探测 Depth API"),
+    CAPTURE("需要相机权限才能采集"),
 }

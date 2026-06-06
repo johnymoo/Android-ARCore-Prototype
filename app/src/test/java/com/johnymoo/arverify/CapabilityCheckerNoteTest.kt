@@ -13,4 +13,11 @@ class CapabilityCheckerNoteTest {
         assertTrue(note.contains("设备不支持 ARCore"))
         assertFalse(note.contains("未安装"))
     }
+
+    @Test fun depthProbeSecurityExceptionAsksForCameraPermission() {
+        val note = CapabilityChecker.depthProbeFailureNote(SecurityException())
+
+        assertTrue(note.contains("相机权限"))
+        assertFalse(note.contains("Depth probe failed"))
+    }
 }
