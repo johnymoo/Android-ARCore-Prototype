@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">原型验证工具</string>
+    <string name="app_name">拾模</string>
+    <string name="brand_en">ScanForge</string>
     <string name="title">原型验证工具</string>
     <string name="btn_check_arcore">检查 ARCore</string>
     <string name="btn_check_depth">检查 Depth API</string>
@@ -38,4 +39,26 @@
     <string name="settings_base_url">服务器地址</string>
     <string name="settings_save_debug_gallery">调试：保存原图到相册</string>
     <string name="frames_counter">已采集：%1$d 张</string>
+
+    <!-- ScanForge navigation / screens -->
+    <string name="nav_home">首页</string>
+    <string name="nav_library">采集库</string>
+    <string name="nav_settings">设置</string>
+    <string name="home_recognition_title">识别采集</string>
+    <string name="home_recognition_desc">拍积木 → 自动识别 → 参数化 3D 模型</string>
+    <string name="home_general_title">通用采集</string>
+    <string name="home_general_desc">RGB + 深度 + 点云，本地导出</string>
+    <string name="home_recent">最近采集</string>
+    <string name="home_recent_all">全部 ›</string>
+    <string name="lib_filter_all">全部</string>
+    <string name="lib_filter_recognized">已识别</string>
+    <string name="lib_filter_pending">待上传</string>
+    <string name="lib_empty">还没有采集记录</string>
+    <string name="frame_rgb">RGB</string>
+    <string name="frame_depth">深度</string>
+    <string name="action_preview_model">预览模型</string>
+    <string name="action_reupload">重新上传</string>
+    <string name="action_delete">删除</string>
+    <string name="settings_diagnostics">设备诊断</string>
+    <string name="general_coming_soon">通用采集将在下一阶段接入</string>
 </resources>
