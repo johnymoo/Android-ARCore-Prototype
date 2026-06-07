@@ -1,4 +1,4 @@
-package <PRIVATE_URL>
+package com.johnymoo.arverify
 
 import android.Manifest
 import android.content.Intent

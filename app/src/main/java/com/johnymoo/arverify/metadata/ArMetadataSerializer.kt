@@ -51,7 +51,7 @@ object ArMetadataSerializer {
     }
 
     private fun numArray(xs: List<Double>): String =
-        xs.joinToString(prefix = "[", postfix = "]") { num(it) }
+        xs.joinToString(separator = ",", prefix = "[", postfix = "]") { num(it) }
 
     /** Whole doubles print as integers ("0", "1"); others as their natural decimal ("0.25", "16.2"). */
     private fun num(d: Double): String =
