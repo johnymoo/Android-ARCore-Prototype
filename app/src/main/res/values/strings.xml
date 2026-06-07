@@ -36,5 +36,6 @@
     <string name="measure_title">引导测量</string>
     <string name="measure_submit">提交测量</string>
     <string name="settings_base_url">服务器地址</string>
+    <string name="settings_save_debug_gallery">调试：保存原图到相册</string>
     <string name="frames_counter">已采集：%1$d 张</string>
 </resources>

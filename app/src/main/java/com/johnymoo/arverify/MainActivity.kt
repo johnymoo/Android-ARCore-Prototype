@@ -109,16 +109,28 @@ class MainActivity : AppCompatActivity() {
 
     private fun showBaseUrlDialog() {
         val prefs = com.johnymoo.arverify.config.AppPrefs(this)
+        val config = prefs.load()
+        val container = android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding(48, 16, 48, 0)
+        }
         val input = android.widget.EditText(this).apply {
-            setText(prefs.load().baseUrl)
+            setText(config.baseUrl)
             inputType = android.text.InputType.TYPE_TEXT_VARIATION_URI
         }
+        val debugGallery = android.widget.CheckBox(this).apply {
+            text = getString(R.string.settings_save_debug_gallery)
+            isChecked = config.saveDebugRgbToGallery
+        }
+        container.addView(input)
+        container.addView(debugGallery)
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle(R.string.settings_base_url)
-            .setView(input)
+            .setView(container)
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 prefs.setBaseUrl(input.text.toString().trim())
-                toast("已保存服务器地址")
+                prefs.setSaveDebugRgbToGallery(debugGallery.isChecked)
+                toast("已保存设置")
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()

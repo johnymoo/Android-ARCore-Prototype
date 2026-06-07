@@ -17,7 +17,11 @@ import com.google.ar.core.Session
 import com.google.ar.core.TrackingState
 import com.google.ar.core.exceptions.CameraNotAvailableException
 import com.google.ar.core.exceptions.NotYetAvailableException
+import com.johnymoo.arverify.config.AppPrefs
+import com.johnymoo.arverify.config.CaptureConfig
+import com.johnymoo.arverify.capture.ArFrameExtractor
 import com.johnymoo.arverify.databinding.ActivityCaptureBinding
+import com.johnymoo.arverify.debug.DebugGallerySaver
 import com.johnymoo.arverify.depth.DepthColorizer
 import com.johnymoo.arverify.export.PlyWriter
 import com.johnymoo.arverify.render.BackgroundRenderer
@@ -32,6 +36,8 @@ class CaptureActivity : AppCompatActivity(), GLSurfaceView.Renderer {
 
     private lateinit var binding: ActivityCaptureBinding
     private val background = BackgroundRenderer()
+    private lateinit var gallerySaver: DebugGallerySaver
+    private lateinit var config: CaptureConfig
     private var session: Session? = null
     private var installRequested = false
 
@@ -44,6 +50,8 @@ class CaptureActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         super.onCreate(savedInstanceState)
         binding = ActivityCaptureBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        gallerySaver = DebugGallerySaver(this)
+        config = AppPrefs(this).load()
 
         binding.surfaceView.preserveEGLContextOnPause = true
         binding.surfaceView.setEGLContextClientVersion(2)
@@ -140,6 +148,19 @@ class CaptureActivity : AppCompatActivity(), GLSurfaceView.Renderer {
             val dir = File(getExternalFilesDir(null), "exports").apply { mkdirs() }
             val stamp = ts()
             val saved = mutableListOf<String>()
+
+            if (config.saveDebugRgbToGallery) {
+                try {
+                    frame.acquireCameraImage().use { image ->
+                        val jpg = ArFrameExtractor.rgbJpeg(image)
+                        if (gallerySaver.saveJpeg(jpg, "debug_rgb_$stamp.jpg")) {
+                            saved.add("相册/debug_rgb_$stamp.jpg")
+                        }
+                    }
+                } catch (e: NotYetAvailableException) {
+                    runOnUiThread { toast("原图未就绪") }
+                }
+            }
 
             try {
                 frame.acquireDepthImage16Bits().use { depth ->

@@ -8,6 +8,7 @@ data class CaptureConfig(
     val minDistanceM: Double = 0.15,
     val maxDistanceM: Double = 0.45,
     val minSharpness: Double = 120.0,
+    val saveDebugRgbToGallery: Boolean = true,
 ) {
     fun thresholds(): QualityThresholds = QualityThresholds(minDistanceM, maxDistanceM, minSharpness)
 }

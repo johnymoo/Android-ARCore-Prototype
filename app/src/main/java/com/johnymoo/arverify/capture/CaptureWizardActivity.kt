@@ -21,6 +21,7 @@ import com.google.ar.core.exceptions.NotYetAvailableException
 import com.johnymoo.arverify.config.AppPrefs
 import com.johnymoo.arverify.config.CaptureConfig
 import com.johnymoo.arverify.databinding.ActivityCaptureWizardBinding
+import com.johnymoo.arverify.debug.DebugGallerySaver
 import com.johnymoo.arverify.imaging.Depth16PngWriter
 import com.johnymoo.arverify.measure.MeasurementFormActivity
 import com.johnymoo.arverify.metadata.ArMetadata
@@ -58,7 +59,9 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
 
     private val controller = CaptureWizardController()
     private lateinit var config: CaptureConfig
+    private lateinit var prefs: AppPrefs
     private lateinit var gate: FrameQualityGate
+    private lateinit var gallerySaver: DebugGallerySaver
     private val partId: String = "part-" + UUID.randomUUID().toString().take(8)
 
     // Captured data
@@ -73,6 +76,7 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
 
     @Volatile private var captureRequested = false
     @Volatile private var lastReasonOk = false
+    @Volatile private var lastQualityReason: QualityReason = QualityReason.NOT_TRACKING
     private var viewportWidth = 0
     private var viewportHeight = 0
     private var displayRotation = 0
@@ -82,8 +86,10 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         super.onCreate(savedInstanceState)
         binding = ActivityCaptureWizardBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        config = AppPrefs(this).load()
+        prefs = AppPrefs(this)
+        config = prefs.load()
         gate = FrameQualityGate(config.thresholds())
+        gallerySaver = DebugGallerySaver(this)
 
         binding.surfaceView.preserveEGLContextOnPause = true
         binding.surfaceView.setEGLContextClientVersion(2)
@@ -91,7 +97,14 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         binding.surfaceView.setRenderer(this)
         binding.surfaceView.renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
 
-        binding.btnCaptureFrame.setOnClickListener { captureRequested = true }
+        binding.btnCaptureFrame.setOnClickListener {
+            if (controller.state.step == WizardStep.READY) return@setOnClickListener
+            if (!lastReasonOk) {
+                toast(lastQualityReason.messageZh)
+                return@setOnClickListener
+            }
+            captureRequested = true
+        }
         binding.btnUpload.setOnClickListener { onUploadClicked() }
         refreshStepUi()
     }
@@ -193,10 +206,11 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         } catch (e: NotYetAvailableException) { /* image not ready */ }
 
         val reason = gate.evaluate(trackingLite(frame), distance, sharpness)
+        lastQualityReason = reason
         lastReasonOk = reason == QualityReason.OK
         runOnUiThread {
             binding.tvQuality.text = if (lastReasonOk) "" else reason.messageZh
-            binding.btnCaptureFrame.isEnabled = lastReasonOk && controller.state.step != WizardStep.READY
+            binding.btnCaptureFrame.isEnabled = CaptureButtonPolicy.isEnabled(controller.state.step)
         }
     }
 
@@ -211,6 +225,7 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
             val rgb = frame.acquireCameraImage().use { ArFrameExtractor.rgbJpeg(it) }
             val rgbPart = FilePart("frame_${images.size}.jpg", "image/jpeg", rgb)
             images.add(rgbPart)
+            maybeSaveDebugRgb(slot, images.size, rgb)
 
             if (slot == CaptureSlot.TOP) {
                 frame.acquireDepthImage16Bits().use { depth ->
@@ -233,6 +248,15 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         }
     }
 
+    private fun maybeSaveDebugRgb(slot: CaptureSlot, frameNumber: Int, rgb: ByteArray) {
+        if (!config.saveDebugRgbToGallery) return
+        val stamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+        val name = "debug_${slot.name.lowercase(Locale.US)}_${frameNumber}_$stamp.jpg"
+        if (gallerySaver.saveJpeg(rgb, name)) {
+            runOnUiThread { toast("原图已保存到相册：$name") }
+        }
+    }
+
     private fun refreshStepUi() {
         val st = controller.state
         binding.tvStep.text = when (st.step) {
@@ -242,6 +266,7 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
             WizardStep.READY -> getString(com.johnymoo.arverify.R.string.wizard_ready)
         }
         binding.tvCounter.text = getString(com.johnymoo.arverify.R.string.frames_counter, st.totalFrames)
+        binding.btnCaptureFrame.isEnabled = CaptureButtonPolicy.isEnabled(st.step)
         binding.btnUpload.isEnabled = st.canUpload
     }
 
