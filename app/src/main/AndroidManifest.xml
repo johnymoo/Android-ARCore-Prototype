@@ -15,6 +15,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.ARCoreVerify"
+        android:usesCleartextTraffic="true"
         tools:targetApi="24">
 
         <!-- AR Optional marker for Google Play Services for AR -->
