@@ -1,7 +1,6 @@
 package com.johnymoo.arverify.ui.home
 
 import android.content.Intent
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.navigation.NavController
 import com.johnymoo.arverify.R
-import com.johnymoo.arverify.capture.CaptureWizardActivity
 import com.johnymoo.arverify.session.CaptureLibraryRepository
 import com.johnymoo.arverify.session.SessionEntry
 import com.johnymoo.arverify.ui.common.SessionPaths
@@ -56,7 +54,10 @@ fun HomeScreen(nav: NavController) {
                 desc = stringResource(R.string.home_recognition_desc),
                 primary = true,
             ) {
-                context.startActivity(Intent(context, CaptureWizardActivity::class.java))
+                context.startActivity(
+                    Intent(context, com.johnymoo.arverify.capture.ScanCaptureActivity::class.java)
+                        .putExtra(com.johnymoo.arverify.capture.ScanCaptureActivity.EXTRA_MODE, "RECOGNITION")
+                )
             }
         }
         item {
@@ -65,7 +66,10 @@ fun HomeScreen(nav: NavController) {
                 desc = stringResource(R.string.home_general_desc),
                 primary = false,
             ) {
-                Toast.makeText(context, R.string.general_coming_soon, Toast.LENGTH_SHORT).show()
+                context.startActivity(
+                    Intent(context, com.johnymoo.arverify.capture.ScanCaptureActivity::class.java)
+                        .putExtra(com.johnymoo.arverify.capture.ScanCaptureActivity.EXTRA_MODE, "GENERAL")
+                )
             }
         }
         item {

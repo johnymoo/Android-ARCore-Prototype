@@ -52,6 +52,12 @@
             android:name=".measure.MeasurementFormActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".capture.ScanCaptureActivity"
+            android:exported="false"
+            android:screenOrientation="locked"
+            android:configChanges="orientation|screenSize|screenLayout|keyboard|keyboardHidden|navigation" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
