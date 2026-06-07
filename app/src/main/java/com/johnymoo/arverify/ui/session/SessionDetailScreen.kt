@@ -78,8 +78,30 @@ fun SessionDetailScreen(nav: NavController, dirPath: String) {
 
         Row(Modifier.fillMaxWidth().padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (session.mode == CaptureMode.RECOGNITION) {
-                Button(onClick = { /* Plan 4: re-upload via CaptureUploader */ }, modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.action_preview_model))
+                Button(onClick = {
+                    val pkg = com.johnymoo.arverify.net.CaptureUploadAssembler
+                        .fromDir(dir, session.partId, session.recognized?.kind ?: "brick", null)
+                    if (pkg == null) { android.widget.Toast.makeText(context, "缺少识别帧", android.widget.Toast.LENGTH_SHORT).show() }
+                    else {
+                        val baseUrl = com.johnymoo.arverify.config.AppPrefs(context).load().baseUrl
+                        android.widget.Toast.makeText(context, "正在重新上传…", android.widget.Toast.LENGTH_SHORT).show()
+                        Thread {
+                            val outcome = com.johnymoo.arverify.net.CaptureUploader(
+                                com.johnymoo.arverify.net.HttpUrlConnectionTransport()
+                            ).upload(baseUrl, pkg)
+                            com.johnymoo.arverify.net.UploadResultHolder.outcome = outcome
+                            com.johnymoo.arverify.net.UploadResultHolder.baseUrl = baseUrl
+                            (context as? android.app.Activity)?.runOnUiThread {
+                                if (outcome is com.johnymoo.arverify.net.UploadOutcome.Success) {
+                                    context.startActivity(android.content.Intent(context, com.johnymoo.arverify.result.ResultActivity::class.java))
+                                } else {
+                                    android.widget.Toast.makeText(context, "上传失败，可重试", android.widget.Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }.start()
+                    }
+                }, modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.action_reupload))
                 }
             }
             OutlinedButton(onClick = {
