@@ -16,4 +16,25 @@
     <string name="capture_tips">光线均匀 · 背景简洁 · 保留尺子/标记 · 正面/侧面/顶面/斜角 · 每次 1~3 个零件</string>
     <string name="btn_shutter">拍摄</string>
     <string name="btn_done">完成</string>
+
+    <!-- Smart capture wizard -->
+    <string name="btn_smart_capture">智能采集（上传识别）</string>
+    <string name="wizard_need_top">第 1 步：正上方对准凸点面，距离约 20–30cm，保持清晰</string>
+    <string name="wizard_need_side">第 2 步：拍一张侧面（用于确认类型）</string>
+    <string name="wizard_need_angles">第 3 步：再拍 ≥2 个不同角度（凑够 4 张）</string>
+    <string name="wizard_ready">已采集足够帧，点「上传」开始识别</string>
+    <string name="wizard_capture">采集本帧</string>
+    <string name="wizard_upload">上传</string>
+    <string name="wizard_progress">正在上传与识别…</string>
+    <string name="kind_title">确认类型</string>
+    <string name="kind_brick">brick（高砖）</string>
+    <string name="kind_plate">plate（薄板）</string>
+    <string name="kind_tile">tile（无凸点平板）</string>
+    <string name="kind_slope">slope（斜面）</string>
+    <string name="result_title">识别结果</string>
+    <string name="result_preview">预览模型</string>
+    <string name="measure_title">引导测量</string>
+    <string name="measure_submit">提交测量</string>
+    <string name="settings_base_url">服务器地址</string>
+    <string name="frames_counter">已采集：%1$d 张</string>
 </resources>
