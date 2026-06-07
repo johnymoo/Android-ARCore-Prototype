@@ -7,7 +7,7 @@ import org.junit.Test
 class CaptureConfigTest {
     @Test fun defaultsAreSensible() {
         val c = CaptureConfig()
-        assertEquals("", c.baseUrl)
+        assertEquals("http://192.168.1.100:8000", c.baseUrl)
         assertEquals(0.15, c.minDistanceM, 1e-9)
         assertEquals(0.45, c.maxDistanceM, 1e-9)
         assertEquals(120.0, c.minSharpness, 1e-9)
