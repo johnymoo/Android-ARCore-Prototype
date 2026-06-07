@@ -8,6 +8,8 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.core.content.ContextCompat
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
@@ -28,6 +30,7 @@ class ScanCaptureActivity : ComponentActivity() {
     private var glView: GLSurfaceView? = null
     private val holder = CaptureHolder()
     private lateinit var renderer: CaptureRenderer
+    private val io = java.util.concurrent.Executors.newSingleThreadExecutor()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,28 +50,74 @@ class ScanCaptureActivity : ComponentActivity() {
 
         setContent {
             ScanForgeTheme {
+                var showKind by remember { mutableStateOf(false) }
                 CaptureScreen(
                     holder = holder,
-                    glViewFactory = { ctx ->
-                        GLSurfaceView(ctx).apply {
-                            preserveEGLContextOnPause = true
-                            setEGLContextClientVersion(2)
-                            setEGLConfigChooser(8, 8, 8, 8, 16, 0)
-                            setRenderer(renderer)
-                            renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
-                            glView = this
-                        }
-                    },
+                    glViewFactory = { ctx -> makeGlView(ctx) },
                     onShutter = { renderer.captureRequested = true },
-                    onFinish = { /* Plan 4: recognition upload / general export */
-                        Toast.makeText(this, "接通在 Plan 4：${mode}", Toast.LENGTH_SHORT).show()
+                    onFinish = {
+                        if (mode == CaptureMode.RECOGNITION) showKind = true
+                        else exportGeneral()
                     },
                     onBack = { finish() },
                     finishLabel = if (mode == CaptureMode.RECOGNITION) "上传" else "导出",
                 )
+                if (showKind) KindDialog(
+                    onConfirm = { kind -> showKind = false; uploadRecognition(kind) },
+                    onDismiss = { showKind = false },
+                )
             }
         }
     }
+
+    private fun makeGlView(ctx: android.content.Context): GLSurfaceView =
+        GLSurfaceView(ctx).apply {
+            preserveEGLContextOnPause = true
+            setEGLContextClientVersion(2)
+            setEGLConfigChooser(8, 8, 8, 8, 16, 0)
+            setRenderer(renderer)
+            renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
+            glView = this
+        }
+
+    private fun uploadRecognition(kind: String) {
+        val dir = java.io.File(holder.state.value.sessionDir)
+        val partId = dir.name.substringBeforeLast('_')
+        val pkg = com.johnymoo.arverify.net.CaptureUploadAssembler.fromDir(dir, partId, kind, null)
+            ?: run { toast("缺少识别帧，请先拍俯视凸点面"); return }
+        val config = com.johnymoo.arverify.config.AppPrefs(this).load()
+        toast("正在上传与识别…")
+        io.execute {
+            val outcome = com.johnymoo.arverify.net.CaptureUploader(
+                com.johnymoo.arverify.net.HttpUrlConnectionTransport()
+            ).upload(config.baseUrl, pkg)
+            runOnUiThread { onUploadResult(outcome, config.baseUrl) }
+        }
+    }
+
+    private fun onUploadResult(outcome: com.johnymoo.arverify.net.UploadOutcome, baseUrl: String) {
+        com.johnymoo.arverify.net.UploadResultHolder.outcome = outcome
+        com.johnymoo.arverify.net.UploadResultHolder.baseUrl = baseUrl
+        when (outcome) {
+            is com.johnymoo.arverify.net.UploadOutcome.Failure ->
+                toast("上传失败：${outcome.message}（已本地留存，可在采集库重试）")
+            is com.johnymoo.arverify.net.UploadOutcome.Success -> when (outcome.result.status) {
+                com.johnymoo.arverify.net.RecognitionStatus.NEEDS_MEASUREMENT ->
+                    startActivity(android.content.Intent(this, com.johnymoo.arverify.measure.MeasurementFormActivity::class.java))
+                else ->
+                    startActivity(android.content.Intent(this, com.johnymoo.arverify.result.ResultActivity::class.java))
+            }
+        }
+    }
+
+    private fun exportGeneral() {
+        val dir = java.io.File(holder.state.value.sessionDir)
+        val files = (dir.listFiles { f -> f.isFile } ?: emptyArray()).toList()
+        if (files.isEmpty()) { toast("还没有可导出的帧"); return }
+        com.johnymoo.arverify.export.ReportExporter(this).share(files, "导出采集")
+    }
+
+    private fun toast(m: String) = Toast.makeText(this, m, Toast.LENGTH_LONG).show()
 
     override fun onResume() {
         super.onResume()
@@ -98,5 +147,5 @@ class ScanCaptureActivity : ComponentActivity() {
         if (session != null) { glView?.onPause(); session?.pause() }
     }
 
-    override fun onDestroy() { session?.close(); session = null; super.onDestroy() }
+    override fun onDestroy() { io.shutdown(); session?.close(); session = null; super.onDestroy() }
 }
