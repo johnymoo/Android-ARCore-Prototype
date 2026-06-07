@@ -18,8 +18,26 @@ class FrameQualityGateTest {
         assertEquals(QualityReason.TOO_CLOSE, gate.evaluate(TrackingStateLite.TRACKING, 0.10, 999.0))
     }
 
+    @Test fun noDepthDoesNotAskUserToMoveCloser() {
+        assertEquals(QualityReason.NO_DEPTH, gate.evaluate(TrackingStateLite.TRACKING, 0.0, 999.0))
+    }
+
     @Test fun tooFar() {
         assertEquals(QualityReason.TOO_FAR, gate.evaluate(TrackingStateLite.TRACKING, 0.60, 999.0))
+    }
+
+    @Test fun focusedNearDoesNotAskUserToMoveCloserWhenDepthSeesBackground() {
+        assertEquals(
+            QualityReason.DEPTH_FOCUS_MISMATCH,
+            gate.evaluate(TrackingStateLite.TRACKING, 0.80, 999.0, focusDistanceM = 0.25),
+        )
+    }
+
+    @Test fun nearFocusCanConfirmTooCloseEvenWhenDepthSeesBackground() {
+        assertEquals(
+            QualityReason.TOO_CLOSE,
+            gate.evaluate(TrackingStateLite.TRACKING, 0.80, 999.0, focusDistanceM = 0.10),
+        )
     }
 
     @Test fun blurryWhenInRangeButLowSharpness() {

@@ -15,6 +15,7 @@ import com.johnymoo.arverify.net.MeasurementField
 import com.johnymoo.arverify.net.RecognitionResult
 import com.johnymoo.arverify.net.UploadOutcome
 import com.johnymoo.arverify.net.UploadResultHolder
+import com.johnymoo.arverify.ui.applyContentSystemBarPadding
 import java.util.concurrent.Executors
 
 class MeasurementFormActivity : AppCompatActivity() {
@@ -27,6 +28,7 @@ class MeasurementFormActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMeasurementFormBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.root.applyContentSystemBarPadding()
 
         val outcome = UploadResultHolder.outcome as? UploadOutcome.Success
         val nm = outcome?.result?.needsMeasurement

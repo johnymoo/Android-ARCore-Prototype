@@ -14,9 +14,11 @@ import androidx.core.content.ContextCompat
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
 import com.google.ar.core.Frame
+import com.google.ar.core.ImageMetadata
 import com.google.ar.core.Session
 import com.google.ar.core.TrackingState
 import com.google.ar.core.exceptions.CameraNotAvailableException
+import com.google.ar.core.exceptions.MetadataNotFoundException
 import com.google.ar.core.exceptions.NotYetAvailableException
 import com.johnymoo.arverify.config.AppPrefs
 import com.johnymoo.arverify.config.CaptureConfig
@@ -41,6 +43,8 @@ import com.johnymoo.arverify.net.UploadOutcome
 import com.johnymoo.arverify.net.UploadResultHolder
 import com.johnymoo.arverify.render.BackgroundRenderer
 import com.johnymoo.arverify.result.ResultActivity
+import com.johnymoo.arverify.ui.applyBottomChromeSystemBarMargins
+import com.johnymoo.arverify.ui.applyTopChromeSystemBarMargins
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -77,6 +81,8 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
     @Volatile private var captureRequested = false
     @Volatile private var lastReasonOk = false
     @Volatile private var lastQualityReason: QualityReason = QualityReason.NOT_TRACKING
+    @Volatile private var lastFocusMeters: Double? = null
+    @Volatile private var lastAfState: Int? = null
     private var viewportWidth = 0
     private var viewportHeight = 0
     private var displayRotation = 0
@@ -86,6 +92,8 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         super.onCreate(savedInstanceState)
         binding = ActivityCaptureWizardBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.topChrome.applyTopChromeSystemBarMargins()
+        binding.bottomChrome.applyBottomChromeSystemBarMargins()
         prefs = AppPrefs(this)
         config = prefs.load()
         gate = FrameQualityGate(config.thresholds())
@@ -99,10 +107,7 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
 
         binding.btnCaptureFrame.setOnClickListener {
             if (controller.state.step == WizardStep.READY) return@setOnClickListener
-            if (!lastReasonOk) {
-                toast(lastQualityReason.messageZh)
-                return@setOnClickListener
-            }
+            if (!lastReasonOk) toast("尝试采集调试帧：${lastQualityReason.messageZh}")
             captureRequested = true
         }
         binding.btnUpload.setOnClickListener { onUploadClicked() }
@@ -172,9 +177,7 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
             val frame = s.update()
             background.draw(frame)
             evaluateQuality(frame)
-            if (captureRequested && lastReasonOk &&
-                frame.camera.trackingState == TrackingState.TRACKING
-            ) {
+            if (captureRequested && frame.camera.trackingState == TrackingState.TRACKING) {
                 captureRequested = false
                 doCapture(frame)
             }
@@ -190,8 +193,9 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
     }
 
     private fun evaluateQuality(frame: Frame) {
-        var distance = topDistanceM
+        var distance = 0.0
         var sharpness = 0.0
+        updateFocusDebug(frame)
         try {
             frame.acquireDepthImage16Bits().use { depth ->
                 val g = ArFrameExtractor.depthGridMm(depth)
@@ -205,13 +209,51 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
             }
         } catch (e: NotYetAvailableException) { /* image not ready */ }
 
-        val reason = gate.evaluate(trackingLite(frame), distance, sharpness)
+        val focusForGate = FocusDistanceModel.gateDistanceMeters(lastFocusMeters, lastAfState)
+        val reason = gate.evaluate(trackingLite(frame), distance, sharpness, focusForGate)
         lastQualityReason = reason
         lastReasonOk = reason == QualityReason.OK
         runOnUiThread {
-            binding.tvQuality.text = if (lastReasonOk) "" else reason.messageZh
+            binding.tvQuality.text = qualityText(reason, distance, sharpness, lastFocusMeters, lastAfState)
             binding.btnCaptureFrame.isEnabled = CaptureButtonPolicy.isEnabled(controller.state.step)
         }
+    }
+
+    private fun updateFocusDebug(frame: Frame) {
+        try {
+            val meta = frame.imageMetadata
+            lastFocusMeters = FocusDistanceModel.metersFromDiopters(
+                meta.getFloat(ImageMetadata.LENS_FOCUS_DISTANCE)
+            )
+            lastAfState = try {
+                meta.getInt(ImageMetadata.CONTROL_AF_STATE)
+            } catch (e: MetadataNotFoundException) {
+                null
+            } catch (e: IllegalArgumentException) {
+                null
+            }
+        } catch (e: NotYetAvailableException) {
+            // Keep the previous focus hint; metadata can lag camera/depth frames.
+        } catch (e: MetadataNotFoundException) {
+            lastFocusMeters = null
+            lastAfState = null
+        } catch (e: IllegalArgumentException) {
+            lastFocusMeters = null
+            lastAfState = null
+        }
+    }
+
+    private fun qualityText(
+        reason: QualityReason,
+        distanceM: Double,
+        sharpness: Double,
+        focusMeters: Double?,
+        afState: Int?,
+    ): String {
+        val d = if (distanceM > 0.0) String.format(Locale.US, "%.2fm", distanceM) else "--"
+        val s = String.format(Locale.US, "%.0f", sharpness)
+        val metrics = "深度 $d · ${FocusDistanceModel.debugText(focusMeters, afState)} · 清晰度 $s"
+        return if (reason == QualityReason.OK) metrics else "${reason.messageZh}\n$metrics"
     }
 
     private fun doCapture(frame: Frame) {

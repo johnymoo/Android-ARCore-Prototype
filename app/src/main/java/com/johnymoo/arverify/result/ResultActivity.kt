@@ -10,6 +10,7 @@ import com.johnymoo.arverify.databinding.ActivityResultBinding
 import com.johnymoo.arverify.net.RecognitionStatus
 import com.johnymoo.arverify.net.UploadOutcome
 import com.johnymoo.arverify.net.UploadResultHolder
+import com.johnymoo.arverify.ui.applyContentSystemBarPadding
 
 class ResultActivity : AppCompatActivity() {
 
@@ -20,6 +21,7 @@ class ResultActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityResultBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.root.applyContentSystemBarPadding()
 
         val outcome = UploadResultHolder.outcome
         if (outcome !is UploadOutcome.Success) {

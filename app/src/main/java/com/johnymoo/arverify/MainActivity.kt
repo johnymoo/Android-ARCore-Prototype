@@ -13,6 +13,7 @@ import com.johnymoo.arverify.ar.CapabilityChecker
 import com.johnymoo.arverify.databinding.ActivityMainBinding
 import com.johnymoo.arverify.export.ReportExporter
 import com.johnymoo.arverify.model.CapabilityReport
+import com.johnymoo.arverify.ui.applyContentSystemBarPadding
 
 class MainActivity : AppCompatActivity() {
 
@@ -41,6 +42,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.root.applyContentSystemBarPadding()
         checker = CapabilityChecker(this)
         exporter = ReportExporter(this)
 

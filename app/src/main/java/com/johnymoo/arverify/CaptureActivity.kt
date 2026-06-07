@@ -25,6 +25,8 @@ import com.johnymoo.arverify.debug.DebugGallerySaver
 import com.johnymoo.arverify.depth.DepthColorizer
 import com.johnymoo.arverify.export.PlyWriter
 import com.johnymoo.arverify.render.BackgroundRenderer
+import com.johnymoo.arverify.ui.applyBottomChromeSystemBarMargins
+import com.johnymoo.arverify.ui.applyTopChromeSystemBarMargins
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -50,6 +52,8 @@ class CaptureActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         super.onCreate(savedInstanceState)
         binding = ActivityCaptureBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.tvTips.applyTopChromeSystemBarMargins()
+        binding.bottomChrome.applyBottomChromeSystemBarMargins()
         gallerySaver = DebugGallerySaver(this)
         config = AppPrefs(this).load()
 
