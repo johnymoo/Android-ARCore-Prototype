@@ -1,4 +1,4 @@
-package com.johnymoo.arverify
+package <PRIVATE_URL>
 
 import android.Manifest
 import android.content.Intent
@@ -30,6 +30,7 @@ class MainActivity : AppCompatActivity() {
             when (purpose) {
                 CameraPermissionPurpose.CHECK_DEPTH -> refreshReport()
                 CameraPermissionPurpose.CAPTURE -> launchCapture()
+                CameraPermissionPurpose.SMART_CAPTURE -> launchSmartCapture()
             }
         } else {
             toast(purpose.deniedToast)
@@ -47,6 +48,8 @@ class MainActivity : AppCompatActivity() {
         binding.btnCheckDepth.setOnClickListener { onCheckDepthClicked() }
         binding.btnCapture.setOnClickListener { onCaptureClicked() }
         binding.btnExport.setOnClickListener { onExportClicked() }
+        binding.btnSmartCapture.setOnClickListener { onSmartCaptureClicked() }
+        binding.btnSmartCapture.setOnLongClickListener { showBaseUrlDialog(); true }
     }
 
     override fun onResume() {
@@ -96,6 +99,31 @@ class MainActivity : AppCompatActivity() {
 
     private fun launchCapture() = startActivity(Intent(this, CaptureActivity::class.java))
 
+    private fun onSmartCaptureClicked() {
+        if (hasCameraPermission()) launchSmartCapture()
+        else requestCameraPermission(CameraPermissionPurpose.SMART_CAPTURE)
+    }
+
+    private fun launchSmartCapture() =
+        startActivity(Intent(this, com.johnymoo.arverify.capture.CaptureWizardActivity::class.java))
+
+    private fun showBaseUrlDialog() {
+        val prefs = com.johnymoo.arverify.config.AppPrefs(this)
+        val input = android.widget.EditText(this).apply {
+            setText(prefs.load().baseUrl)
+            inputType = android.text.InputType.TYPE_TEXT_VARIATION_URI
+        }
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.settings_base_url)
+            .setView(input)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                prefs.setBaseUrl(input.text.toString().trim())
+                toast("已保存服务器地址")
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
     private fun onExportClicked() {
         val r = lastReport ?: checker.buildReport(this).also { lastReport = it }
         val files = exporter.writeReport(r)
@@ -118,4 +146,5 @@ class MainActivity : AppCompatActivity() {
 enum class CameraPermissionPurpose(val deniedToast: String) {
     CHECK_DEPTH("需要相机权限才能探测 Depth API"),
     CAPTURE("需要相机权限才能采集"),
+    SMART_CAPTURE("需要相机权限才能智能采集"),
 }

@@ -40,6 +40,13 @@
             android:text="@string/btn_capture" />
 
         <Button
+            android:id="@+id/btn_smart_capture"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/btn_smart_capture" />
+
+        <Button
             android:id="@+id/btn_export"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
