@@ -9,6 +9,13 @@ import com.johnymoo.arverify.session.CaptureSession
 import com.johnymoo.arverify.session.CapturedFrame
 import com.johnymoo.arverify.session.SessionStatus
 import com.johnymoo.arverify.imaging.Depth16PngWriter
+import com.johnymoo.arverify.metadata.ArMetadata
+import com.johnymoo.arverify.metadata.ArMetadataSerializer
+import com.johnymoo.arverify.metadata.CameraIntrinsics
+import com.johnymoo.arverify.metadata.CameraPose
+import com.johnymoo.arverify.metadata.DepthDims
+import com.johnymoo.arverify.metadata.DeviceMeta
+import com.johnymoo.arverify.metadata.RecognitionFrameMeta
 import java.io.File
 
 class CaptureSessionWriter(
@@ -43,6 +50,26 @@ class CaptureSessionWriter(
         frames.add(CapturedFrame(slot, rgbName, depthName, distanceM, sharpness))
         rewriteManifest(if (mode == CaptureMode.RECOGNITION) SessionStatus.PENDING_UPLOAD else SessionStatus.EXPORTED)
         return frames.toList()
+    }
+
+    fun writeRecognition(
+        intrinsics: CameraIntrinsics, pose: CameraPose, distanceM: Double,
+        depthGridMm: IntArray, depthW: Int, depthH: Int,
+        rgbJpeg: ByteArray, arcoreVersion: String,
+    ) {
+        File(dir, "recognition_rgb.jpg").writeBytes(rgbJpeg)
+        File(dir, "recognition_depth.png").writeBytes(Depth16PngWriter.encode(depthGridMm, depthW, depthH))
+        val meta = ArMetadata(
+            device = DeviceMeta(model = deviceModel, arcore = arcoreVersion),
+            recognitionFrame = RecognitionFrameMeta(
+                imageIntrinsics = intrinsics,
+                depth = DepthDims(depthW, depthH),
+                cameraPose = pose,
+                distanceM = distanceM,
+            ),
+            coarseHints = null,
+        )
+        File(dir, "ar_metadata.json").writeText(ArMetadataSerializer.toJson(meta))
     }
 
     fun snapshot(status: SessionStatus): CaptureSession =
