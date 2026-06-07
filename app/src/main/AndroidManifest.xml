@@ -37,6 +37,16 @@
             android:screenOrientation="locked"
             android:configChanges="orientation|screenSize|screenLayout|keyboard|keyboardHidden|navigation" />
 
+        <activity
+            android:name=".capture.CaptureWizardActivity"
+            android:exported="false"
+            android:screenOrientation="locked"
+            android:configChanges="orientation|screenSize|screenLayout|keyboard|keyboardHidden|navigation" />
+
+        <activity
+            android:name=".result.ResultActivity"
+            android:exported="false" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
