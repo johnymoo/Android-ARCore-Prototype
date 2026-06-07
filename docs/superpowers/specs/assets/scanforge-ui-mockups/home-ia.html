@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>① 信息架构与导航（主屏 + 屏幕地图）</title>
+<style>
+    /*
+     * BRAINSTORM COMPANION FRAME TEMPLATE
+     *
+     * This template provides a consistent frame with:
+     * - OS-aware light/dark theming
+     * - Fixed header and selection indicator bar
+     * - Scrollable main content area
+     * - CSS helpers for common UI patterns
+     *
+     * Content is injected via placeholder comment in #claude-content.
+     */
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+
+    /* ===== THEME VARIABLES ===== */
+    :root {
+      --bg-primary: #f5f5f7;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #e5e5e7;
+      --border: #d1d1d6;
+      --text-primary: #1d1d1f;
+      --text-secondary: #86868b;
+      --text-tertiary: #aeaeb2;
+      --accent: #0071e3;
+      --accent-hover: #0077ed;
+      --success: #34c759;
+      --warning: #ff9f0a;
+      --error: #ff3b30;
+      --selected-bg: #e8f4fd;
+      --selected-border: #0071e3;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-primary: #1d1d1f;
+        --bg-secondary: #2d2d2f;
+        --bg-tertiary: #3d3d3f;
+        --border: #424245;
+        --text-primary: #f5f5f7;
+        --text-secondary: #86868b;
+        --text-tertiary: #636366;
+        --accent: #0a84ff;
+        --accent-hover: #409cff;
+        --selected-bg: rgba(10, 132, 255, 0.15);
+        --selected-border: #0a84ff;
+      }
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    /* ===== FRAME STRUCTURE ===== */
+    .header {
+      background: var(--bg-secondary);
+      padding: 0.5rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .header h1 { font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); }
+    .header .status { font-size: 0.7rem; color: var(--success); display: flex; align-items: center; gap: 0.4rem; }
+    .header .status::before { content: ''; width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
+
+    .main { flex: 1; overflow-y: auto; }
+    #claude-content { padding: 2rem; min-height: 100%; }
+
+    .indicator-bar {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      padding: 0.5rem 1.5rem;
+      flex-shrink: 0;
+      text-align: center;
+    }
+    .indicator-bar span {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    .indicator-bar .selected-text {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* ===== TYPOGRAPHY ===== */
+    h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .subtitle { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .section { margin-bottom: 2rem; }
+    .label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+
+    /* ===== OPTIONS (for A/B/C choices) ===== */
+    .options { display: flex; flex-direction: column; gap: 0.75rem; }
+    .option {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .option:hover { border-color: var(--accent); }
+    .option.selected { background: var(--selected-bg); border-color: var(--selected-border); }
+    .option .letter {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      width: 1.75rem; height: 1.75rem;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 0.85rem; flex-shrink: 0;
+    }
+    .option.selected .letter { background: var(--accent); color: white; }
+    .option .content { flex: 1; }
+    .option .content h3 { font-size: 0.95rem; margin-bottom: 0.15rem; }
+    .option .content p { color: var(--text-secondary); font-size: 0.85rem; margin: 0; }
+
+    /* ===== CARDS (for showing designs/mockups) ===== */
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .card.selected { border-color: var(--selected-border); border-width: 2px; }
+    .card-image { background: var(--bg-tertiary); aspect-ratio: 16/10; display: flex; align-items: center; justify-content: center; }
+    .card-body { padding: 1rem; }
+    .card-body h3 { margin-bottom: 0.25rem; }
+    .card-body p { color: var(--text-secondary); font-size: 0.85rem; }
+
+    /* ===== MOCKUP CONTAINER ===== */
+    .mockup {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .mockup-header {
+      background: var(--bg-tertiary);
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+    .mockup-body { padding: 1.5rem; }
+
+    /* ===== SPLIT VIEW (side-by-side comparison) ===== */
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 700px) { .split { grid-template-columns: 1fr; } }
+
+    /* ===== PROS/CONS ===== */
+    .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+    .pros, .cons { background: var(--bg-secondary); border-radius: 8px; padding: 1rem; }
+    .pros h4 { color: var(--success); font-size: 0.85rem; margin-bottom: 0.5rem; }
+    .cons h4 { color: var(--error); font-size: 0.85rem; margin-bottom: 0.5rem; }
+    .pros ul, .cons ul { margin-left: 1.25rem; font-size: 0.85rem; color: var(--text-secondary); }
+    .pros li, .cons li { margin-bottom: 0.25rem; }
+
+    /* ===== PLACEHOLDER (for mockup areas) ===== */
+    .placeholder {
+      background: var(--bg-tertiary);
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      color: var(--text-tertiary);
+    }
+
+    /* ===== INLINE MOCKUP ELEMENTS ===== */
+    .mock-nav { background: var(--accent); color: white; padding: 0.75rem 1rem; display: flex; gap: 1.5rem; font-size: 0.9rem; }
+    .mock-sidebar { background: var(--bg-tertiary); padding: 1rem; min-width: 180px; }
+    .mock-content { padding: 1.5rem; flex: 1; }
+    .mock-button { background: var(--accent); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.85rem; }
+    .mock-input { background: var(--bg-primary); border: 1px solid var(--border); border-radius: 6px; padding: 0.5rem; width: 100%; }
+  
+
+html,body{height:auto;overflow:visible}
+body{display:block;background:#1d1d1f}
+.main{overflow:visible}
+#claude-content{padding:1.25rem;min-height:0}
+:root{--bg-primary:#1d1d1f;--bg-secondary:#2d2d2f;--bg-tertiary:#3d3d3f;--border:#424245;
+--text-primary:#f5f5f7;--text-secondary:#9aa0a6;--text-tertiary:#636366;--accent:#1ED7B5;
+--accent-hover:#3fe6c8;--success:#34c759;--warning:#ff9f0a;--error:#ff3b30;
+--selected-bg:rgba(30,215,181,.15);--selected-border:#1ED7B5}
+</style>
+<script>function toggleSelect(){}</script>
+</head><body><div class="main"><div id="claude-content">
+<h2>第 1 节 · 信息架构与导航</h2>
+<p class="subtitle">深色专业风的主屏 + 全 App 屏幕地图。底部 3 个常驻 Tab；采集流程为全屏沉浸（无底栏）。</p>
+
+<style>
+  .wrap{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;justify-content:center}
+  .ph3{width:230px;height:430px;border-radius:26px;overflow:hidden;border:3px solid #222;
+       background:#0E1320;color:#E8EDF5;display:flex;flex-direction:column;font-size:12px}
+  .ph3 .hd{padding:18px 16px 6px;display:flex;align-items:baseline;justify-content:space-between}
+  .ph3 .hd b{font-size:19px}.ph3 .hd .en{font-size:11px;opacity:.55;margin-left:5px}
+  .ph3 .hd .gear{opacity:.6}
+  .ph3 .bd{flex:1;padding:6px 14px;display:flex;flex-direction:column;gap:11px;overflow:hidden}
+  .big{border-radius:18px;padding:16px;position:relative;overflow:hidden}
+  .big .ic{font-size:22px}.big b{display:block;font-size:15px;margin-top:6px}
+  .big s{display:block;text-decoration:none;font-size:10.5px;opacity:.8;margin-top:2px}
+  .big.prim{background:linear-gradient(135deg,#0f3a33,#0E1320);border:1px solid #1ED7B5}
+  .big.prim b,.big.prim .ic{color:#1ED7B5}
+  .big.sec{background:#161D2B}
+  .recent{font-size:11px;opacity:.7;margin-top:2px;display:flex;justify-content:space-between}
+  .rr{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid #1b2433}
+  .rr .t{width:34px;height:27px;border-radius:6px;
+         background:radial-gradient(circle at 50% 60%,#c9a24b 0 9px,#33425a 10px)}
+  .rr small{display:block;opacity:.5;font-size:9px}
+  .tag{margin-left:auto;font-size:9px;padding:2px 7px;border-radius:9px}
+  .tag.ok{background:#163d2a;color:#56d39a}.tag.wait{background:#3d3416;color:#e3c156}
+  .bn{display:flex;justify-content:space-around;padding:11px 0 13px;background:#0A0E17;color:#6f7d92;font-size:10px}
+  .bn .a{color:#1ED7B5}
+  .map{flex:1;min-width:260px;max-width:340px;font-size:12.5px;line-height:1.65}
+  .map h3{margin:0 0 6px}.map .grp{background:#0e1320;border:1px solid #1b2433;border-radius:12px;
+           padding:10px 13px;margin-bottom:10px;color:#cdd7e6}
+  .map .grp b{color:#1ED7B5}
+  .map code{background:#11182a;padding:1px 5px;border-radius:4px;font-size:11px}
+</style>
+
+<div class="wrap">
+  <div class="ph3">
+    <div class="hd"><div><b>拾模</b><span class="en">ScanForge</span></div><span class="gear">⚙︎</span></div>
+    <div class="bd">
+      <div class="big prim"><div class="ic">◳</div><b>识别采集</b><s>拍积木 → 自动识别 system/类型/凸点 → 参数化 3D 模型</s></div>
+      <div class="big sec"><div class="ic">▦</div><b>通用采集</b><s>任意小物体：RGB + 深度 + 点云，本地导出</s></div>
+      <div class="recent"><span>最近采集</span><span style="color:#1ED7B5">全部 ›</span></div>
+      <div class="rr"><span class="t"></span><div>part-9f3a · 4 帧<small>06-07 21:30</small></div><span class="tag ok">已识别</span></div>
+      <div class="rr"><span class="t"></span><div>part-12c8 · 5 帧<small>06-07 20:10</small></div><span class="tag wait">待上传</span></div>
+    </div>
+    <div class="bn"><span class="a">⌂ 首页</span><span>▤ 采集库</span><span>⚙ 设置</span></div>
+  </div>
+
+  <div class="map">
+    <h3>屏幕地图</h3>
+    <div class="grp"><b>① 首页 Home</b><br>双轨入口 + 最近采集快捷。</div>
+    <div class="grp"><b>② 识别采集流</b>（全屏）<br>取景（深度热力可开关 · 向导/自由可切 · 即时回看条）→ 类型轻确认 → 上传进度 → <b>结果</b>（识别结论 + GLB 预览）／<b>引导测量</b>兜底。</div>
+    <div class="grp"><b>③ 通用采集流</b>（全屏）<br>取景（同款深度热力 + 回看条）→ 选帧 → 本地导出 RGB/16-bit 深度 PNG/PLY 点云 + 分享。</div>
+    <div class="grp"><b>④ 采集库 Library</b><br>历史会话列表（已识别/待上传）→ 会话详情（逐帧 RGB/深度回看、重传、删除、定位本地文件）。</div>
+    <div class="grp"><b>⑤ 设置 Settings</b><br>服务器地址、采集参数（距离区间/锐度阈值）、调试存图开关、<b>设备诊断</b>（原能力检测：ARCore/Depth/推荐路线）。</div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:14px">采集/相机为全屏深色无底栏；其余页统一深色 + 青色强调。这版结构对吗？要加/删页面尽管说。</p>
+
+</div></div></body></html>

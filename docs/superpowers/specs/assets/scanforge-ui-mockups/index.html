@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>拾模 / ScanForge · UI 原型集</title>
+<style>
+  body{margin:0;background:#0E1320;color:#E8EDF5;
+    font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6}
+  .wrap{max-width:1040px;margin:0 auto;padding:30px 20px 80px}
+  .badge{display:inline-block;font-size:11px;color:#1ED7B5;border:1px solid #1ED7B5;
+    border-radius:11px;padding:2px 10px}
+  h1{font-size:24px;border-bottom:2px solid #1b2433;padding-bottom:12px;margin:10px 0 4px}
+  .lead{color:#9fb0c7;font-size:14px;margin-bottom:8px}
+  section{margin-top:30px}
+  section h2{font-size:17px;color:#1ED7B5;margin:0 0 8px}
+  iframe{width:100%;border:1px solid #1b2433;border-radius:12px;background:#1d1d1f;display:block}
+  .src{font-size:12px;color:#7d8ca3;margin:6px 2px 0}
+  code{background:#11182a;padding:1px 6px;border-radius:5px;font-size:12px}
+  a{color:#1ED7B5}
+</style>
+<script>
+  function fit(f){ try{ f.style.height = (f.contentWindow.document.documentElement.scrollHeight + 8) + 'px'; }catch(e){ f.style.height='720px'; } }
+  window.addEventListener('resize', () => document.querySelectorAll('iframe').forEach(fit));
+</script>
+</head><body><div class="wrap">
+<div class="badge">UI 原型集 · 离线可读 · 开发参考</div>
+<h1>拾模 / ScanForge · UI 原型集</h1>
+<p class="lead">配套设计 spec：<code>../../2026-06-07-scanforge-app-redesign-design.md</code>。以下为头脑风暴阶段确认的界面线框（深色专业扫描风）。①–③ 为最终设计，④–⑥ 为关键选型（标注已选方向）。线框聚焦布局与信息层级，非像素级视觉稿。</p>
+  <section>
+    <h2>① 信息架构与导航（主屏 + 屏幕地图）</h2>
+    <iframe src="home-ia.html" loading="lazy" onload="fit(this)"></iframe>
+    <p class="src">源文件：<code>home-ia.html</code></p>
+  </section>
+  <section>
+    <h2>② 采集页（实时深度叠加 / 向导·自由 / 质量条 / 即时回看条）</h2>
+    <iframe src="capture-screen.html" loading="lazy" onload="fit(this)"></iframe>
+    <p class="src">源文件：<code>capture-screen.html</code></p>
+  </section>
+  <section>
+    <h2>③ 帧回看 · 会话详情 · 采集库</h2>
+    <iframe src="review-detail.html" loading="lazy" onload="fit(this)"></iframe>
+    <p class="src">源文件：<code>review-detail.html</code></p>
+  </section>
+  <section>
+    <h2>④ 实时深度预览���向 — 选定 A · 全屏热力叠加（可开关）</h2>
+    <iframe src="depth-preview.html" loading="lazy" onload="fit(this)"></iframe>
+    <p class="src">源文件：<code>depth-preview.html</code></p>
+  </section>
+  <section>
+    <h2>⑤ 视觉风格 — 选定 B · 深色专业扫描风</h2>
+    <iframe src="visual-style.html" loading="lazy" onload="fit(this)"></iframe>
+    <p class="src">源文件：<code>visual-style.html</code></p>
+  </section>
+  <section>
+    <h2>⑥ 采集后查看方向 — 选定 C · 即时回看条 + 持久采集库</h2>
+    <iframe src="review.html" loading="lazy" onload="fit(this)"></iframe>
+    <p class="src">源文件：<code>review.html</code></p>
+  </section>
+</div></body></html>

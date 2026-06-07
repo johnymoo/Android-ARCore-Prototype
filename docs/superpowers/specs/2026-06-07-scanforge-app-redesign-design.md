@@ -174,3 +174,39 @@ AR/GL 层（薄 · 真机验证）      ARCore 会话 + RGB 渲染 + 新增实�
 - 不做任意工件的真实公制重建（方案 B，后续阶段）。
 - 不做端上**权威**识别（识别权威仍在后端）。
 - 现阶段不引入数据库、不改 `applicationId`/源码包名、不做云同步/账户体系。
+
+---
+
+## 附录 A · UI 原型参考（开发用）
+
+> 头脑风暴阶段逐屏确认的界面线框，供开发参考。聚焦**布局与信息层级**，非像素级视觉稿；配色为选定的「深色专业扫描风」。
+
+- **可交互原型集（离线打开）**：[`assets/scanforge-ui-mockups/index.html`](assets/scanforge-ui-mockups/index.html) —— 浏览器打开即可逐屏查看，各屏源文件在同目录下（`home-ia.html` / `capture-screen.html` / `review-detail.html` 等）。
+
+### A.1 最终设计
+
+**① 信息架构与导航（主屏 + 屏幕地图）**
+
+![主屏与屏幕地图](assets/scanforge-ui-mockups/img/scanforge-01-home-ia.png)
+
+**② 采集页（实时深度叠加 / 向导·自由 / 质量条 / 即时回看条）**
+
+![采集页](assets/scanforge-ui-mockups/img/scanforge-02-capture.png)
+
+**③ 帧回看 · 会话详情 · 采集库**
+
+![回看与采集库](assets/scanforge-ui-mockups/img/scanforge-03-review.png)
+
+### A.2 关键选型（标注已选方向）
+
+**④ 实时深度预览 —— 选定 A · 全屏热力叠加（可开关）**
+
+![深度预览方向](assets/scanforge-ui-mockups/img/scanforge-04-depth.png)
+
+**⑤ 视觉风格 —— 选定 B · 深色专业扫描风**
+
+![视觉风格](assets/scanforge-ui-mockups/img/scanforge-05-style.png)
+
+**⑥ 采集后查看 —— 选定 C · 即时回看条 + 持久采集库**
+
+![采集后查看方向](assets/scanforge-ui-mockups/img/scanforge-06-review-options.png)
