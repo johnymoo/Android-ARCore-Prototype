@@ -30,3 +30,19 @@
 - 应用为 **AR Optional**：即使设备不支持 AR 也能安装并显示「不支持」结论。
 - 若为无 Google 服务的国行 ROM 且安装失败，可从 OPPO 应用商店或侧载安装
   「Google Play Services for AR」。
+
+## 智能采集（上传识别）
+
+主界面点「智能采集（上传识别）」进入采集向导（**长按该按钮可配置服务器地址**）：
+
+1. **俯视凸点帧**：正上方对准凸点面，距离约 20–30cm，画面稳定清晰；满足条件后「采集本帧」可用。
+2. **侧视帧**：拍一张侧面。
+3. **补充角度**：再拍 ≥2 个不同角度（共 ≥4 张）。
+4. 点「上传」→ 选择类型（brick/plate/tile/slope）→ 上传到 BrickStudio。
+5. **结果**：`recognized` → 展示 system/kind/units/pitch/confidence，可「预览模型」(GLB)；
+   `needs_measurement` → 进入引导测量表单，按提示填写后提交。
+
+- 采集包会先**本地留存**到 `<PRIVATE_URL>`，上传失败不丢数据。
+- 上传契约见 `<PRIVATE_URL>` §5 与
+  `docs/contracts/ar-capture-contract.sample.json`（两仓库共享锁定）。
+- 传输为局域网明文 HTTP（manifest 已开启 `usesCleartextTraffic`）。
