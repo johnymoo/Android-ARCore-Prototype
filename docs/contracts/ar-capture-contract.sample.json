@@ -1,6 +1,6 @@
 {
   "request_ar_metadata": {
-    "device": {"model": "PLG110", "arcore": "<ACCOUNT_NUMBER>"},
+    "device": {"model": "PLG110", "arcore": "1.54.260890493"},
     "recognition_frame": {
       "image_intrinsics": {"fx": 1466.5, "fy": 1466.5, "cx": 960.0, "cy": 540.0, "width": 1920, "height": 1080},
       "depth": {"width": 160, "height": 90, "format": "DEPTH16_MM"},

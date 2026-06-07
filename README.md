@@ -42,7 +42,7 @@
 5. **结果**：`recognized` → 展示 system/kind/units/pitch/confidence，可「预览模型」(GLB)；
    `needs_measurement` → 进入引导测量表单，按提示填写后提交。
 
-- 采集包会先**本地留存**到 `<PRIVATE_URL>`，上传失败不丢数据。
-- 上传契约见 `<PRIVATE_URL>` §5 与
+- 采集包会先**本地留存**到 `Android/data/com.johnymoo.arverify/files/captures/`，上传失败不丢数据。
+- 上传契约见 `docs/superpowers/specs/2026-06-07-arcore-capture-client-design.md` §5 与
   `docs/contracts/ar-capture-contract.sample.json`（两仓库共享锁定）。
 - 传输为局域网明文 HTTP（manifest 已开启 `usesCleartextTraffic`）。
