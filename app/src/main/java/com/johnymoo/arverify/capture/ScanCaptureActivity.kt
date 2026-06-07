@@ -42,7 +42,8 @@ class ScanCaptureActivity : ComponentActivity() {
             deviceModel = android.os.Build.MODEL ?: "",
             depthRange = DepthOverlayRange.fromDistanceBand(config.minDistanceM, config.maxDistanceM),
         )
-        renderer = CaptureRenderer({ session }, config, mode, holder, writer, windowManager)
+        renderer = CaptureRenderer({ session }, config, mode, holder, writer, windowManager,
+            try { packageManager.getPackageInfo("com.google.ar.core", 0).versionName ?: "" } catch (e: Exception) { "" })
 
         setContent {
             ScanForgeTheme {

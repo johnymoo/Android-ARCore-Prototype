@@ -23,6 +23,7 @@ class CaptureRenderer(
     private val holder: CaptureHolder,
     private val writer: CaptureSessionWriter,
     private val windowManager: WindowManager,
+    private val arcoreVersion: String = "",
 ) : GLSurfaceView.Renderer {
 
     private val background = BackgroundRenderer()
@@ -106,8 +107,29 @@ class CaptureRenderer(
 
             val frames = writer.addFrame(slot, rgb, gridVals, gw, gh, dist, holder.state.value.sharpness)
             controller.record(slot)
+
+            if (mode == CaptureMode.RECOGNITION && slot == CaptureSlot.TOP &&
+                gridVals != null && gw > 0 && gh > 0) {
+                val intr = ArFrameExtractor.intrinsics(frame)
+                val pose = ArFrameExtractor.pose(frame)
+                writer.writeRecognition(intr, pose, dist ?: 0.0, gridVals!!, gw, gh, rgb, arcoreVersion)
+                holder.state.value = holder.state.value.copy(topReady = true)
+            }
+
+            if (mode == CaptureMode.GENERAL) {
+                try {
+                    frame.acquirePointCloud().use { pc ->
+                        val buf = pc.points
+                        val arr = FloatArray(buf.remaining()); buf.get(arr)
+                        java.io.File(writer.dir, "points_${frames.size - 1}.ply")
+                            .writeText(com.johnymoo.arverify.export.PlyWriter.toAsciiPly(arr))
+                    }
+                } catch (e: NotYetAvailableException) { /* no cloud yet */ }
+            }
+
             holder.state.value = holder.state.value.copy(
-                frames = frames, wizardStep = controller.state.step, canFinish = controller.state.canUpload,
+                frames = frames, sessionDir = writer.dir.absolutePath,
+                wizardStep = controller.state.step, canFinish = controller.state.canUpload,
             )
         } catch (e: Exception) { /* surfaced via toast in Activity if needed */ }
     }

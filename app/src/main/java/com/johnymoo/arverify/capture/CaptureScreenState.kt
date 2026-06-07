@@ -15,6 +15,8 @@ data class CaptureUiState(
     val frames: List<CapturedFrame> = emptyList(),
     val wizardStep: WizardStep = WizardStep.NEED_TOP,
     val canFinish: Boolean = false,
+    val sessionDir: String = "",
+    val topReady: Boolean = false,
 )
 
 class CaptureHolder {
