@@ -23,7 +23,17 @@ data class RecognitionFrameMeta(
     val imageIntrinsics: CameraIntrinsics,
     val depth: DepthDims,
     val cameraPose: CameraPose,
+    /** Backward-compatible scale distance: visual reference when available, ARCore fallback otherwise. */
     val distanceM: Double,
+    /** Explicit ARCore gate distance from depth or HitTest. */
+    val arcoreDistanceM: Double = distanceM,
+    val arcoreDistanceSource: String = "UNKNOWN",
+    val visualDistanceM: Double? = null,
+    val visualReferenceWidthPx: Double? = null,
+    val visualReferenceWidthMm: Double = 33.84,
+    val visualReferenceStatus: String = "NOT_EVALUATED",
+    val distanceSourceForScale: String = "ARCORE_DISTANCE",
+    val distanceConfidence: String = "LOW",
 )
 
 /** Full `ar_metadata` payload (spec §5). */

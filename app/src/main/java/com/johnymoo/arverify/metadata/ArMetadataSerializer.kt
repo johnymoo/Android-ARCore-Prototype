@@ -38,7 +38,15 @@ object ArMetadataSerializer {
         append("\"t\":").append(numArray(f.cameraPose.t)).append(',')
         append("\"q\":").append(numArray(f.cameraPose.q))
         append("},")
-        append("\"distance_m\":").append(num(f.distanceM))
+        append("\"distance_m\":").append(num(f.distanceM)).append(',')
+        append("\"arcore_distance_m\":").append(num(f.arcoreDistanceM)).append(',')
+        append("\"arcore_distance_source\":\"").append(esc(f.arcoreDistanceSource)).append("\",")
+        append("\"visual_distance_m\":").append(numOrNull(f.visualDistanceM)).append(',')
+        append("\"visual_reference_width_px\":").append(numOrNull(f.visualReferenceWidthPx)).append(',')
+        append("\"visual_reference_width_mm\":").append(num(f.visualReferenceWidthMm)).append(',')
+        append("\"visual_reference_status\":\"").append(esc(f.visualReferenceStatus)).append("\",")
+        append("\"distance_source_for_scale\":\"").append(esc(f.distanceSourceForScale)).append("\",")
+        append("\"distance_confidence\":\"").append(esc(f.distanceConfidence)).append('"')
         append('}')
     }
 
@@ -56,6 +64,8 @@ object ArMetadataSerializer {
     /** Whole doubles print as integers ("0", "1"); others as their natural decimal ("0.25", "16.2"). */
     private fun num(d: Double): String =
         if (d == d.toLong().toDouble()) d.toLong().toString() else d.toString()
+
+    private fun numOrNull(d: Double?): String = d?.let { num(it) } ?: "null"
 
     private fun esc(s: String): String = buildString {
         for (c in s) when (c) {
