@@ -20,12 +20,17 @@ import com.google.ar.core.exceptions.CameraNotAvailableException
 import com.johnymoo.arverify.config.AppPrefs
 import com.johnymoo.arverify.depth.DepthOverlayRange
 import com.johnymoo.arverify.session.CaptureMode
+import com.johnymoo.arverify.session.SessionStatus
 import com.johnymoo.arverify.ui.common.SessionPaths
 import com.johnymoo.arverify.ui.theme.ScanForgeTheme
+import java.io.File
 import java.util.UUID
 
 class ScanCaptureActivity : ComponentActivity() {
-    companion object { const val EXTRA_MODE = "mode" }
+    companion object {
+        const val EXTRA_MODE = "mode"
+        const val EXTRA_RESUME_DIR = "resume_dir"
+    }
 
     private var session: Session? = null
     private var installRequested = false
@@ -38,22 +43,39 @@ class ScanCaptureActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val mode = if (intent.getStringExtra(EXTRA_MODE) == "GENERAL") CaptureMode.GENERAL else CaptureMode.RECOGNITION
+        val resumeDir = intent.getStringExtra(EXTRA_RESUME_DIR)?.let { File(it) }
         val config = AppPrefs(this).load()
         holder.setReferenceModeEnabled(config.visualReferenceModeEnabled)
-        val writer = CaptureSessionWriter(
-            rootDir = SessionPaths.captureRoot(this),
-            partId = "part-" + UUID.randomUUID().toString().take(8),
-            mode = mode,
-            createdAtEpochMs = System.currentTimeMillis(),
-            deviceModel = android.os.Build.MODEL ?: "",
-            depthRange = DepthOverlayRange.fromDistanceBand(config.minDistanceM, config.maxDistanceM),
-        )
+        val depthRange = DepthOverlayRange.fromDistanceBand(config.minDistanceM, config.maxDistanceM)
+        val writer = if (resumeDir != null) {
+            CaptureSessionWriter.resume(
+                sessionDir = resumeDir,
+                depthRange = depthRange,
+            )
+        } else {
+            CaptureSessionWriter(
+                rootDir = SessionPaths.captureRoot(this),
+                partId = "part-" + UUID.randomUUID().toString().take(8),
+                mode = mode,
+                createdAtEpochMs = System.currentTimeMillis(),
+                deviceModel = android.os.Build.MODEL ?: "",
+                depthRange = depthRange,
+            )
+        }
         renderer = CaptureRenderer({ session }, config, mode, holder, writer, windowManager,
             try { packageManager.getPackageInfo("com.google.ar.core", 0).versionName ?: "" } catch (e: Exception) { "" },
             diagnosticsRoot = SessionPaths.diagnosticsRoot(this),
             onDiagnosticSaved = { dir -> runOnUiThread { toast("诊断已保存：${dir.name}") } },
             onDiagnosticError = { error -> runOnUiThread { toast("诊断保存失败：${error.message ?: error.javaClass.simpleName}") } },
         )
+        if (resumeDir != null) {
+            val snapshot = writer.snapshot(SessionStatus.PENDING_UPLOAD)
+            holder.state.value = holder.state.value.copy(
+                modeUi = CaptureModeUi.FREE,
+                frames = snapshot.frames,
+                sessionDir = writer.dir.absolutePath,
+            )
+        }
 
         setContent {
             ScanForgeTheme {

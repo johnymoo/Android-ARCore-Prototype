@@ -86,6 +86,18 @@ class ResultActivity : ComponentActivity() {
                                 modifier = Modifier.padding(top = 4.dp),
                             )
                         }
+                        Button(
+                            onClick = {
+                                startActivity(
+                                    android.content.Intent(this@ResultActivity, com.johnymoo.arverify.capture.ScanCaptureActivity::class.java)
+                                        .putExtra(com.johnymoo.arverify.capture.ScanCaptureActivity.EXTRA_MODE, "RECOGNITION")
+                                )
+                                finish()
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text("继续拍下一块")
+                        }
                         var showModel by remember { mutableStateOf(false) }
                         if (glbUrl != null) {
                             Button(onClick = { showModel = true }, modifier = Modifier.fillMaxWidth()) {

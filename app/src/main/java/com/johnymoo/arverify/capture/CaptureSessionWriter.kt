@@ -7,6 +7,7 @@ import com.johnymoo.arverify.session.CaptureLibraryRepository
 import com.johnymoo.arverify.session.CaptureMode
 import com.johnymoo.arverify.session.CaptureSession
 import com.johnymoo.arverify.session.CapturedFrame
+import com.johnymoo.arverify.session.SessionManifestCodec
 import com.johnymoo.arverify.session.SessionStatus
 import com.johnymoo.arverify.imaging.Depth16PngWriter
 import com.johnymoo.arverify.metadata.ArMetadata
@@ -26,9 +27,11 @@ class CaptureSessionWriter(
     private val deviceModel: String,
     private val depthRange: DepthRangeMm,
     private val repo: CaptureLibraryRepository = CaptureLibraryRepository(rootDir),
+    existingDir: File? = null,
+    initialFrames: List<CapturedFrame> = emptyList(),
 ) {
-    val dir: File = File(rootDir, "${partId}_$createdAtEpochMs").apply { mkdirs() }
-    private val frames = mutableListOf<CapturedFrame>()
+    val dir: File = existingDir ?: File(rootDir, "${partId}_$createdAtEpochMs").apply { mkdirs() }
+    private val frames = initialFrames.toMutableList()
 
     fun addFrame(
         slot: CaptureSlot,
@@ -112,4 +115,31 @@ class CaptureSessionWriter(
         CaptureSession(partId, mode, createdAtEpochMs, deviceModel, status, frames.toList())
 
     private fun rewriteManifest(status: SessionStatus) = repo.writeManifest(dir, snapshot(status))
+
+    companion object {
+        fun resume(
+            sessionDir: File,
+            depthRange: DepthRangeMm,
+            repo: CaptureLibraryRepository = CaptureLibraryRepository(
+                sessionDir.parentFile ?: error("Cannot resume capture session without parent directory")
+            ),
+        ): CaptureSessionWriter {
+            val rootDir = sessionDir.parentFile
+                ?: error("Cannot resume capture session without parent directory")
+            val manifestFile = File(sessionDir, CaptureLibraryRepository.MANIFEST)
+            val session = SessionManifestCodec.fromJson(manifestFile.readText())
+                ?: error("Cannot resume damaged capture session")
+            return CaptureSessionWriter(
+                rootDir = rootDir,
+                partId = session.partId,
+                mode = session.mode,
+                createdAtEpochMs = session.createdAtEpochMs,
+                deviceModel = session.deviceModel,
+                depthRange = depthRange,
+                repo = repo,
+                existingDir = sessionDir,
+                initialFrames = session.frames,
+            )
+        }
+    }
 }

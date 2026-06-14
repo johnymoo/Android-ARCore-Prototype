@@ -1,6 +1,7 @@
 package com.johnymoo.arverify
 
 import com.google.gson.JsonParser
+import com.johnymoo.arverify.capture.CaptureSlot
 import com.johnymoo.arverify.capture.CaptureSessionWriter
 import com.johnymoo.arverify.capture.DistanceConfidence
 import com.johnymoo.arverify.capture.DistanceSourceForScale
@@ -20,6 +21,35 @@ import java.io.File
 
 class CaptureSessionWriterTest {
     @get:Rule val tmp = TemporaryFolder()
+
+    @Test fun appendingToExistingSessionContinuesFrameNumberingAndManifest() {
+        val root = tmp.newFolder("captures")
+        val original = CaptureSessionWriter(
+            rootDir = root,
+            partId = "part-resume",
+            mode = CaptureMode.RECOGNITION,
+            createdAtEpochMs = 1234L,
+            deviceModel = "PLG110",
+            depthRange = DepthRangeMm(150, 700),
+        )
+        original.addFrame(CaptureSlot.TOP, byteArrayOf(1), null)
+        original.addFrame(CaptureSlot.SIDE, byteArrayOf(2), null)
+
+        val resumed = CaptureSessionWriter.resume(
+            sessionDir = original.dir,
+            depthRange = DepthRangeMm(150, 700),
+        )
+        val frames = resumed.addFrame(CaptureSlot.ANGLE, byteArrayOf(3), null)
+
+        assertEquals(original.dir, resumed.dir)
+        assertTrue(original.dir.resolve("frame_2.jpg").isFile)
+        assertEquals(listOf("frame_0.jpg", "frame_1.jpg", "frame_2.jpg"), frames.map { it.rgbFileName })
+
+        val parsed = com.johnymoo.arverify.session.SessionManifestCodec
+            .fromJson(original.dir.resolve(com.johnymoo.arverify.session.CaptureLibraryRepository.MANIFEST).readText())!!
+        assertEquals("part-resume", parsed.partId)
+        assertEquals(3, parsed.frames.size)
+    }
 
     @Test fun writeRecognitionPersistsVisualScaleMetadata() {
         val writer = CaptureSessionWriter(

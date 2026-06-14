@@ -23,14 +23,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.johnymoo.arverify.R
 import com.johnymoo.arverify.session.CaptureLibraryRepository
 import com.johnymoo.arverify.session.CaptureMode
 import com.johnymoo.arverify.session.SessionStatus
@@ -109,6 +107,15 @@ fun SessionDetailScreen(nav: NavController, dirPath: String) {
 
         Row(Modifier.fillMaxWidth().padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (session.mode == CaptureMode.RECOGNITION) {
+                OutlinedButton(onClick = {
+                    context.startActivity(
+                        android.content.Intent(context, com.johnymoo.arverify.capture.ScanCaptureActivity::class.java)
+                            .putExtra(com.johnymoo.arverify.capture.ScanCaptureActivity.EXTRA_MODE, "RECOGNITION")
+                            .putExtra(com.johnymoo.arverify.capture.ScanCaptureActivity.EXTRA_RESUME_DIR, dir.absolutePath)
+                    )
+                }, modifier = Modifier.weight(1f)) {
+                    Text("补拍")
+                }
                 Button(onClick = {
                     val pkg = com.johnymoo.arverify.net.CaptureUploadAssembler
                         .fromDir(dir, session.partId, session.recognized?.kind ?: "brick", null)
@@ -144,14 +151,14 @@ fun SessionDetailScreen(nav: NavController, dirPath: String) {
                         }.start()
                     }
                 }, modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.action_reupload))
+                    Text("上传")
                 }
             }
             OutlinedButton(onClick = {
                 vm.delete(dir, session)
                 nav.popBackStack()
             }, modifier = Modifier.weight(1f)) {
-                Text(stringResource(R.string.action_delete))
+                Text("删除")
             }
         }
     }
