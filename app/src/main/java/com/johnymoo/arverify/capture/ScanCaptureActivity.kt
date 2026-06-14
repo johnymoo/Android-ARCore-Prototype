@@ -39,6 +39,7 @@ class ScanCaptureActivity : ComponentActivity() {
         enableEdgeToEdge()
         val mode = if (intent.getStringExtra(EXTRA_MODE) == "GENERAL") CaptureMode.GENERAL else CaptureMode.RECOGNITION
         val config = AppPrefs(this).load()
+        holder.setReferenceModeEnabled(config.visualReferenceModeEnabled)
         val writer = CaptureSessionWriter(
             rootDir = SessionPaths.captureRoot(this),
             partId = "part-" + UUID.randomUUID().toString().take(8),

@@ -38,4 +38,7 @@ class CaptureHolder {
 
     fun toggleDepth() { state.value = state.value.copy(depthOn = !state.value.depthOn) }
     fun setMode(m: CaptureModeUi) { state.value = state.value.copy(modeUi = m) }
+    fun setReferenceModeEnabled(enabled: Boolean) {
+        state.value = state.value.copy(referenceModeEnabled = enabled)
+    }
 }

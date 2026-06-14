@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -30,9 +31,9 @@ fun SettingsScreen(nav: NavController) {
     val context = LocalContext.current
     val prefs = remember { AppPrefs(context) }
     val initial = remember { prefs.load() }
-    var baseUrl by remember { mutableStateOf(initial.baseUrl) }
-    var debugGallery by remember { mutableStateOf(initial.saveDebugRgbToGallery) }
-    var referenceMode by remember { mutableStateOf(initial.visualReferenceModeEnabled) }
+    var baseUrl by rememberSaveable { mutableStateOf(initial.baseUrl) }
+    var debugGallery by rememberSaveable { mutableStateOf(initial.saveDebugRgbToGallery) }
+    var referenceMode by rememberSaveable { mutableStateOf(initial.visualReferenceModeEnabled) }
 
     Column(
         Modifier.fillMaxWidth().padding(16.dp),
