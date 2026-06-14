@@ -89,6 +89,14 @@ fun CaptureScreen(
                 Text("诊断", color = Color.White.copy(alpha = 0.9f),
                     style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
             }
+            Surface(color = Color(0x88000000), shape = MaterialTheme.shapes.large) {
+                Text(
+                    if (state.referenceModeEnabled) "参考尺 ● 开" else "参考尺 ○ 关",
+                    color = Color.White.copy(alpha = 0.9f),
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
+                )
+            }
         }
 
         // Quality + prompt (center-bottom)

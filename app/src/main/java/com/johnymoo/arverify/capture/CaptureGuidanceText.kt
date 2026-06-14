@@ -32,10 +32,15 @@ object CaptureGuidanceText {
             DistanceConfidence.HIGH -> "高可信"
             DistanceConfidence.LOW -> "低可信"
         }
+        val scaleLabel = when (state.distanceSourceForScale) {
+            DistanceSourceForScale.VISUAL_REFERENCE -> "参考尺"
+            DistanceSourceForScale.ARCORE_DISTANCE -> "尺度估计"
+        }
+        val action = if (state.manualMeasurementRecommended) "建议测量确认" else confidence
         val target = if (state.targetLocked) "目标锁定" else "未锁定"
         return String.format(
             Locale.US,
-            "$target · 尺度 $scaleDistance · 门控 $gateLabel $gateDistance · $confidence · 清晰度 %.0f",
+            "$target · $scaleLabel $scaleDistance · 门控 $gateLabel $gateDistance · $action · 清晰度 %.0f",
             state.sharpness,
         )
     }

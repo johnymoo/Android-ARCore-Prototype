@@ -32,6 +32,7 @@ fun SettingsScreen(nav: NavController) {
     val initial = remember { prefs.load() }
     var baseUrl by remember { mutableStateOf(initial.baseUrl) }
     var debugGallery by remember { mutableStateOf(initial.saveDebugRgbToGallery) }
+    var referenceMode by remember { mutableStateOf(initial.visualReferenceModeEnabled) }
 
     Column(
         Modifier.fillMaxWidth().padding(16.dp),
@@ -48,6 +49,10 @@ fun SettingsScreen(nav: NavController) {
                 trailing = { Switch(checked = debugGallery, onCheckedChange = { debugGallery = it }) },
             )
             SettingRow(
+                label = "参考尺模式：放了标准参考砖时开启",
+                trailing = { Switch(checked = referenceMode, onCheckedChange = { referenceMode = it }) },
+            )
+            SettingRow(
                 label = stringResource(R.string.settings_diagnostics),
                 onClick = { nav.navigate(Routes.DIAGNOSTICS) },
                 showDivider = false,
@@ -57,6 +62,7 @@ fun SettingsScreen(nav: NavController) {
         Button(onClick = {
             prefs.setBaseUrl(baseUrl.trim())
             prefs.setSaveDebugRgbToGallery(debugGallery)
+            prefs.setVisualReferenceModeEnabled(referenceMode)
         }) { Text("保存") }
     }
 }
