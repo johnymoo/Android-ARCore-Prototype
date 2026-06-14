@@ -1,5 +1,6 @@
 package com.johnymoo.arverify.result
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.webkit.WebView
 import androidx.activity.ComponentActivity
@@ -22,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.johnymoo.arverify.R
 import com.johnymoo.arverify.net.RecognitionStatus
 import com.johnymoo.arverify.net.UploadOutcome
 import com.johnymoo.arverify.net.UploadResultHolder
@@ -35,6 +37,7 @@ import com.johnymoo.arverify.ui.theme.SfOkBg
 import org.json.JSONObject
 
 class ResultActivity : ComponentActivity() {
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -50,7 +53,7 @@ class ResultActivity : ComponentActivity() {
 
         setContent {
             ScanForgeTheme {
-                ScreenScaffold(title = "识别结果", onBack = { finish() }) { pad ->
+                ScreenScaffold(title = getString(R.string.screen_result), onBack = { finish() }) { pad ->
                     Column(
                         Modifier
                             .padding(pad)
