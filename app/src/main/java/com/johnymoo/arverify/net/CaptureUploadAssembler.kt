@@ -5,6 +5,8 @@ import java.io.File
 object CaptureUploadAssembler {
     const val MIN_IMAGES = 4
 
+    data class UploadReadiness(val ready: Boolean, val message: String? = null)
+
     fun fromDir(dir: File, partId: String, kind: String, systemHint: String?): CapturePackage? {
         val metaFile = File(dir, "ar_metadata.json")
         val rgbFile = File(dir, "recognition_rgb.jpg")
@@ -28,4 +30,12 @@ object CaptureUploadAssembler {
 
     fun missingImageCount(pkg: CapturePackage): Int =
         (MIN_IMAGES - pkg.images.size).coerceAtLeast(0)
+
+    fun readiness(dir: File): UploadReadiness {
+        val pkg = fromDir(dir, dir.name.substringBeforeLast('_'), "brick", null)
+            ?: return UploadReadiness(false, "缺少识别帧，请先拍俯视凸点面")
+        val missing = missingImageCount(pkg)
+        if (missing > 0) return UploadReadiness(false, "还需补拍 ${missing} 张角度图后再上传")
+        return UploadReadiness(true)
+    }
 }

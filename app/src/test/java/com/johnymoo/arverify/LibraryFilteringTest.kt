@@ -42,4 +42,22 @@ class LibraryFilteringTest {
         val r = LibraryFiltering.apply(all, LibraryFilter.PENDING).map { it.session.partId }
         assertEquals(listOf("b", "c"), r)
     }
+
+    @Test fun allHidesEmptySessions() {
+        val empty = SessionEntry(
+            dir = File("/tmp/empty"),
+            session = CaptureSession(
+                partId = "empty",
+                mode = CaptureMode.RECOGNITION,
+                createdAtEpochMs = 1L,
+                deviceModel = "PLG110",
+                status = SessionStatus.PENDING_UPLOAD,
+                frames = emptyList(),
+            ),
+        )
+
+        val visible = LibraryFiltering.apply(listOf(empty) + all, LibraryFilter.ALL)
+
+        assertEquals(listOf("a", "b", "c", "d"), visible.map { it.session.partId })
+    }
 }

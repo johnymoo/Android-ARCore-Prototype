@@ -94,13 +94,13 @@ class ScanCaptureActivity : ComponentActivity() {
     private fun uploadRecognition(kind: String) {
         val dir = java.io.File(holder.state.value.sessionDir)
         val partId = dir.name.substringBeforeLast('_')
-        val pkg = com.johnymoo.arverify.net.CaptureUploadAssembler.fromDir(dir, partId, kind, null)
-            ?: run { toast("缺少识别帧，请先拍俯视凸点面"); return }
-        val missingImages = com.johnymoo.arverify.net.CaptureUploadAssembler.missingImageCount(pkg)
-        if (missingImages > 0) {
-            toast("还需补拍 ${missingImages} 张角度图后再上传")
+        val readiness = com.johnymoo.arverify.net.CaptureUploadAssembler.readiness(dir)
+        if (!readiness.ready) {
+            toast(readiness.message ?: "请先补齐采集")
             return
         }
+        val pkg = com.johnymoo.arverify.net.CaptureUploadAssembler.fromDir(dir, partId, kind, null)
+            ?: run { toast("缺少识别帧，请先拍俯视凸点面"); return }
         val config = com.johnymoo.arverify.config.AppPrefs(this).load()
         toast("正在上传与识别…")
         io.execute {

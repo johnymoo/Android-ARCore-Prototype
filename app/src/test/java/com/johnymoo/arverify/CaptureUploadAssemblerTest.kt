@@ -47,4 +47,43 @@ class CaptureUploadAssemblerTest {
         val dir = tmp.newFolder("empty_1")
         assertNull(CaptureUploadAssembler.fromDir(dir, "p", "brick", null))
     }
+
+    @Test fun readinessReportsMissingRecognitionFiles() {
+        val dir = tmp.newFolder("empty_1")
+
+        val readiness = CaptureUploadAssembler.readiness(dir)
+
+        assertEquals(false, readiness.ready)
+        assertEquals("缺少识别帧，请先拍俯视凸点面", readiness.message)
+    }
+
+    @Test fun readinessAllowsLowConfidenceScaleForBackendDecision() {
+        val dir = tmp.newFolder("part-low_123")
+        seed(dir)
+        File(dir, "frame_2.jpg").writeBytes(byteArrayOf(7))
+        File(dir, "frame_3.jpg").writeBytes(byteArrayOf(8))
+        File(dir, "ar_metadata.json").writeText(
+            """{"recognition_frame":{"distance_confidence":"LOW","manual_measurement_recommended":true}}"""
+        )
+
+        val readiness = CaptureUploadAssembler.readiness(dir)
+
+        assertEquals(true, readiness.ready)
+        assertEquals(null, readiness.message)
+    }
+
+    @Test fun readinessPassesWhenPackageHasEnoughImagesAndScaleConfidence() {
+        val dir = tmp.newFolder("part-ready_123")
+        seed(dir)
+        File(dir, "frame_2.jpg").writeBytes(byteArrayOf(7))
+        File(dir, "frame_3.jpg").writeBytes(byteArrayOf(8))
+        File(dir, "ar_metadata.json").writeText(
+            """{"recognition_frame":{"distance_confidence":"HIGH","manual_measurement_recommended":false}}"""
+        )
+
+        val readiness = CaptureUploadAssembler.readiness(dir)
+
+        assertEquals(true, readiness.ready)
+        assertEquals(null, readiness.message)
+    }
 }

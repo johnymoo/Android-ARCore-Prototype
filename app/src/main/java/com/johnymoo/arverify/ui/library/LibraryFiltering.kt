@@ -6,12 +6,15 @@ import com.johnymoo.arverify.session.SessionStatus
 enum class LibraryFilter { ALL, RECOGNIZED, PENDING }
 
 object LibraryFiltering {
-    fun apply(entries: List<SessionEntry>, filter: LibraryFilter): List<SessionEntry> = when (filter) {
-        LibraryFilter.ALL -> entries
-        LibraryFilter.RECOGNIZED -> entries.filter { it.session.status == SessionStatus.RECOGNIZED }
-        LibraryFilter.PENDING -> entries.filter {
-            it.session.status == SessionStatus.PENDING_UPLOAD ||
-                it.session.status == SessionStatus.NEEDS_MEASUREMENT
+    fun apply(entries: List<SessionEntry>, filter: LibraryFilter): List<SessionEntry> {
+        val visibleEntries = entries.filter { it.session.frames.isNotEmpty() }
+        return when (filter) {
+            LibraryFilter.ALL -> visibleEntries
+            LibraryFilter.RECOGNIZED -> visibleEntries.filter { it.session.status == SessionStatus.RECOGNIZED }
+            LibraryFilter.PENDING -> visibleEntries.filter {
+                it.session.status == SessionStatus.PENDING_UPLOAD ||
+                    it.session.status == SessionStatus.NEEDS_MEASUREMENT
+            }
         }
     }
 }
