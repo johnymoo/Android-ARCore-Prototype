@@ -71,6 +71,7 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
     private val controller = CaptureWizardController()
     private lateinit var config: CaptureConfig
     private lateinit var depthRange: DepthRangeMm
+    private lateinit var scalePolicy: ScaleEstimationPolicy
     private lateinit var prefs: AppPrefs
     private lateinit var gate: FrameQualityGate
     private lateinit var gallerySaver: DebugGallerySaver
@@ -108,6 +109,12 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         prefs = AppPrefs(this)
         config = prefs.load()
         depthRange = DepthOverlayRange.fromDistanceBand(config.minDistanceM, config.maxDistanceM)
+        scalePolicy = ScaleEstimationPolicy(
+            referenceModeEnabled = config.visualReferenceModeEnabled,
+            visualMinDistanceM = config.visualReferenceMinDistanceM,
+            visualMaxDistanceM = config.visualReferenceMaxDistanceM,
+            maxDepthDisagreementM = config.visualReferenceMaxDepthDisagreementM,
+        )
         gate = FrameQualityGate(config.thresholds())
         gallerySaver = DebugGallerySaver(this)
 
@@ -328,6 +335,7 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
                     intrinsics = topIntrinsics!!,
                     arcoreDistanceM = topDistanceM,
                     arcoreDistanceSource = topDistanceSource,
+                    policy = scalePolicy,
                 )
             }
             controller.record(slot)
