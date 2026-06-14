@@ -40,6 +40,8 @@ data class DepthFrameDiagnostics(
     @SerializedName("visual_reference_status") val visualReferenceStatus: String = "NOT_EVALUATED",
     @SerializedName("distance_source_for_scale") val distanceSourceForScale: String = "ARCORE_DISTANCE",
     @SerializedName("distance_confidence") val distanceConfidence: String = "LOW",
+    @SerializedName("reference_mode_enabled") val referenceModeEnabled: Boolean = false,
+    @SerializedName("manual_measurement_recommended") val manualMeasurementRecommended: Boolean = true,
     @SerializedName("sharpness") val sharpness: Double,
     @SerializedName("depth_available") val depthAvailable: Boolean,
     @SerializedName("depth_unavailable_reason") val depthUnavailableReason: String?,

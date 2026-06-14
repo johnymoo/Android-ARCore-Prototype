@@ -41,6 +41,8 @@ class CaptureSessionWriterTest {
             visualReferenceStatus = "DETECTED",
             distanceSourceForScale = DistanceSourceForScale.VISUAL_REFERENCE,
             distanceConfidence = DistanceConfidence.HIGH,
+            referenceModeEnabled = true,
+            manualMeasurementRecommended = false,
         )
 
         writer.writeRecognition(
@@ -65,5 +67,7 @@ class CaptureSessionWriterTest {
         assertEquals(65.0, frame["visual_reference_width_px"].asDouble, 0.0)
         assertEquals("VISUAL_REFERENCE", frame["distance_source_for_scale"].asString)
         assertEquals("HIGH", frame["distance_confidence"].asString)
+        assertEquals(true, frame["reference_mode_enabled"].asBoolean)
+        assertEquals(false, frame["manual_measurement_recommended"].asBoolean)
     }
 }

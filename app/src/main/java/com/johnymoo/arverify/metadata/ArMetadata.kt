@@ -34,6 +34,8 @@ data class RecognitionFrameMeta(
     val visualReferenceStatus: String = "NOT_EVALUATED",
     val distanceSourceForScale: String = "ARCORE_DISTANCE",
     val distanceConfidence: String = "LOW",
+    val referenceModeEnabled: Boolean = false,
+    val manualMeasurementRecommended: Boolean = true,
 )
 
 /** Full `ar_metadata` payload (spec §5). */

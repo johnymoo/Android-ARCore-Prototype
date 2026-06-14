@@ -70,6 +70,8 @@ class DepthDiagnosticsTest {
             visualReferenceStatus = "RGB_UNAVAILABLE",
             distanceSourceForScale = "ARCORE_DISTANCE",
             distanceConfidence = "LOW",
+            referenceModeEnabled = false,
+            manualMeasurementRecommended = true,
             sharpness = 73.0,
             depthAvailable = false,
             depthUnavailableReason = "NotYetAvailableException",
@@ -99,6 +101,51 @@ class DepthDiagnosticsTest {
         assertEquals("RGB_UNAVAILABLE", obj["visual_reference_status"].asString)
         assertEquals("ARCORE_DISTANCE", obj["distance_source_for_scale"].asString)
         assertEquals("LOW", obj["distance_confidence"].asString)
+        assertFalse(obj["reference_mode_enabled"].asBoolean)
+        assertTrue(obj["manual_measurement_recommended"].asBoolean)
         assertEquals("DEPTH_NOT_AVAILABLE", obj["lock_failure_reason"].asString)
+    }
+
+    @Test fun serializesDisabledReferenceModeForDepthBugReports() {
+        val report = DepthFrameDiagnostics(
+            createdAtEpochMs = 123_457L,
+            deviceModel = "PLG110",
+            arcoreVersion = "1.54",
+            trackingState = "TRACKING",
+            qualityReason = QualityReason.NO_TARGET.name,
+            targetLocked = false,
+            distanceM = 1.802,
+            distanceSource = "DEPTH",
+            fallbackDistanceM = null,
+            scaleDistanceM = 1.802,
+            arcoreDistanceM = 1.802,
+            arcoreDistanceSource = "DEPTH",
+            visualDistanceM = null,
+            visualReferenceWidthPx = null,
+            visualReferenceWidthMm = 33.84,
+            visualReferenceStatus = "REFERENCE_MODE_DISABLED",
+            distanceSourceForScale = "ARCORE_DISTANCE",
+            distanceConfidence = "LOW",
+            referenceModeEnabled = false,
+            manualMeasurementRecommended = true,
+            sharpness = 1354.0,
+            depthAvailable = true,
+            depthUnavailableReason = null,
+            depthWidth = 160,
+            depthHeight = 90,
+            depthRangeMinMm = 150,
+            depthRangeMaxMm = 700,
+            roiFraction = 0.56,
+            lockFailureReason = "NO_IN_RANGE_DEPTH",
+            depthSummary = null,
+        )
+
+        val obj = JsonParser.parseString(DepthDiagnostics.toJson(report)).asJsonObject
+
+        assertEquals("REFERENCE_MODE_DISABLED", obj["visual_reference_status"].asString)
+        assertEquals("ARCORE_DISTANCE", obj["distance_source_for_scale"].asString)
+        assertEquals("LOW", obj["distance_confidence"].asString)
+        assertFalse(obj["reference_mode_enabled"].asBoolean)
+        assertTrue(obj["manual_measurement_recommended"].asBoolean)
     }
 }

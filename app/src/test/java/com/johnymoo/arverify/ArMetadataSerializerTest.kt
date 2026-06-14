@@ -29,6 +29,8 @@ class ArMetadataSerializerTest {
             visualReferenceStatus = "DETECTED",
             distanceSourceForScale = "VISUAL_REFERENCE",
             distanceConfidence = "HIGH",
+            referenceModeEnabled = true,
+            manualMeasurementRecommended = false,
         ),
         coarseHints = hints,
     )
@@ -43,7 +45,8 @@ class ArMetadataSerializerTest {
             """"camera_pose":{"t":[0,0,0],"q":[0,0,0,1]},""" +
             """"distance_m":0.22584816,"arcore_distance_m":0.673,"arcore_distance_source":"DEPTH",""" +
             """"visual_distance_m":0.22584816,"visual_reference_width_px":65,"visual_reference_width_mm":33.84,""" +
-            """"visual_reference_status":"DETECTED","distance_source_for_scale":"VISUAL_REFERENCE","distance_confidence":"HIGH"},""" +
+            """"visual_reference_status":"DETECTED","distance_source_for_scale":"VISUAL_REFERENCE","distance_confidence":"HIGH",""" +
+            """"reference_mode_enabled":true,"manual_measurement_recommended":false},""" +
             """"coarse_hints":{"rough_units_x":2,"rough_units_y":4,"rough_pitch_mm":16.2}}"""
         assertEquals(expected, json)
     }
@@ -54,7 +57,9 @@ class ArMetadataSerializerTest {
         assertTrue(json.contains("\"distance_m\":0.22584816"))
         assertTrue(json.contains("\"arcore_distance_m\":0.673"))
         assertTrue(json.contains("\"visual_reference_width_px\":65"))
-        assertTrue(json.endsWith("\"distance_confidence\":\"HIGH\"}}"))
+        assertTrue(json.contains("\"reference_mode_enabled\":true"))
+        assertTrue(json.contains("\"manual_measurement_recommended\":false"))
+        assertTrue(json.endsWith("\"manual_measurement_recommended\":false}}"))
     }
 
     @Test fun realFloatsAndStringEscaping() {
@@ -103,6 +108,8 @@ class ArMetadataSerializerTest {
                     visualReferenceStatus = "NO_RED_REFERENCE",
                     distanceSourceForScale = "ARCORE_DISTANCE",
                     distanceConfidence = "LOW",
+                    referenceModeEnabled = false,
+                    manualMeasurementRecommended = true,
                 ),
                 coarseHints = null,
             )
@@ -112,5 +119,7 @@ class ArMetadataSerializerTest {
         assertTrue(json.contains("\"visual_reference_width_px\":null"))
         assertTrue(json.contains("\"distance_source_for_scale\":\"ARCORE_DISTANCE\""))
         assertTrue(json.contains("\"distance_confidence\":\"LOW\""))
+        assertTrue(json.contains("\"reference_mode_enabled\":false"))
+        assertTrue(json.contains("\"manual_measurement_recommended\":true"))
     }
 }

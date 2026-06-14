@@ -281,6 +281,8 @@ class CaptureRenderer(
                 visualReferenceStatus = diagnosticScaleDistance.visualReferenceStatus,
                 distanceSourceForScale = diagnosticScaleDistance.distanceSourceForScale.name,
                 distanceConfidence = diagnosticScaleDistance.distanceConfidence.name,
+                referenceModeEnabled = diagnosticScaleDistance.referenceModeEnabled,
+                manualMeasurementRecommended = diagnosticScaleDistance.manualMeasurementRecommended,
                 sharpness = state.sharpness,
                 depthAvailable = depthValues != null,
                 depthUnavailableReason = depthUnavailableReason,

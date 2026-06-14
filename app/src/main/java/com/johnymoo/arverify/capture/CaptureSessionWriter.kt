@@ -100,6 +100,8 @@ class CaptureSessionWriter(
                 visualReferenceStatus = scaleDistance.visualReferenceStatus,
                 distanceSourceForScale = scaleDistance.distanceSourceForScale.name,
                 distanceConfidence = scaleDistance.distanceConfidence.name,
+                referenceModeEnabled = scaleDistance.referenceModeEnabled,
+                manualMeasurementRecommended = scaleDistance.manualMeasurementRecommended,
             ),
             coarseHints = null,
         )

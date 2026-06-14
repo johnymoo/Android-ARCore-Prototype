@@ -46,7 +46,9 @@ object ArMetadataSerializer {
         append("\"visual_reference_width_mm\":").append(num(f.visualReferenceWidthMm)).append(',')
         append("\"visual_reference_status\":\"").append(esc(f.visualReferenceStatus)).append("\",")
         append("\"distance_source_for_scale\":\"").append(esc(f.distanceSourceForScale)).append("\",")
-        append("\"distance_confidence\":\"").append(esc(f.distanceConfidence)).append('"')
+        append("\"distance_confidence\":\"").append(esc(f.distanceConfidence)).append("\",")
+        append("\"reference_mode_enabled\":").append(f.referenceModeEnabled).append(',')
+        append("\"manual_measurement_recommended\":").append(f.manualMeasurementRecommended)
         append('}')
     }
 
