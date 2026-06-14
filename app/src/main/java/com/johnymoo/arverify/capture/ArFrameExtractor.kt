@@ -1,5 +1,6 @@
 package com.johnymoo.arverify.capture
 
+import android.graphics.BitmapFactory
 import android.graphics.ImageFormat
 import android.graphics.Rect
 import android.graphics.YuvImage
@@ -24,23 +25,37 @@ object ArFrameExtractor {
         return out.toByteArray()
     }
 
-    /** DEPTH16 image → row-major millimeter grid (low 13 bits are the depth; high bits = confidence). */
+    /** JPEG bytes -> pure RGB image for visual reference detection. Android runtime bridge only. */
+    fun rgbPixelsFromJpeg(jpeg: ByteArray): RgbImage? {
+        val bitmap = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.size) ?: return null
+        try {
+            val pixels = IntArray(bitmap.width * bitmap.height)
+            bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+            return RgbImage(bitmap.width, bitmap.height, pixels)
+        } finally {
+            bitmap.recycle()
+        }
+    }
+
+    /** ARCore 16-bit depth image → row-major millimeter grid. */
     fun depthGridMm(depth: Image): Grid {
         val w = depth.width
         val h = depth.height
         val plane = depth.planes[0]
-        val shorts = plane.buffer.order(ByteOrder.nativeOrder()).asShortBuffer()
+        val shorts = plane.buffer.order(ByteOrder.LITTLE_ENDIAN).asShortBuffer()
         val rowStrideShorts = plane.rowStride / 2
         val mm = IntArray(w * h)
         for (y in 0 until h) {
             val rowStart = y * rowStrideShorts
             for (x in 0 until w) {
                 val raw = shorts.get(rowStart + x).toInt() and 0xFFFF
-                mm[y * w + x] = raw and 0x1FFF // DEPTH16: low 13 bits = millimeters
+                mm[y * w + x] = depth16Millimeters(raw)
             }
         }
         return Grid(mm, w, h)
     }
+
+    fun depth16Millimeters(rawSample: Int): Int = rawSample and 0x1FFF
 
     /** Y plane of a YUV image → luma grid (0..255), for the sharpness metric. */
     fun lumaGrid(image: Image): Grid {
