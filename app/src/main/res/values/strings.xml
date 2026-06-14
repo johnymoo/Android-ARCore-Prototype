@@ -44,6 +44,9 @@
     <string name="nav_home">首页</string>
     <string name="nav_library">采集库</string>
     <string name="nav_settings">设置</string>
+    <string name="screen_session_detail">会话详情</string>
+    <string name="screen_frame_viewer">帧查看器</string>
+    <string name="screen_result">识别结果</string>
     <string name="home_recognition_title">识别采集</string>
     <string name="home_recognition_desc">拍积木 → 自动识别 → 参数化 3D 模型</string>
     <string name="home_general_title">通用采集</string>
