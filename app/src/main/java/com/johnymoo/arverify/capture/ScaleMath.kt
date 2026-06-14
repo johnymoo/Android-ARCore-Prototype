@@ -15,6 +15,16 @@ object ScaleMath {
         return metricSpanMeters * focalLengthPx / distanceMeters
     }
 
+    /** Distance (meters) implied by a known physical width projected to [detectedWidthPx]. */
+    fun distanceFromKnownWidthMeters(
+        referenceWidthMeters: Double,
+        focalLengthPx: Double,
+        detectedWidthPx: Double,
+    ): Double {
+        if (referenceWidthMeters <= 0.0 || focalLengthPx <= 0.0 || detectedWidthPx <= 0.0) return 0.0
+        return referenceWidthMeters * focalLengthPx / detectedWidthPx
+    }
+
     /**
      * Median of valid (>0) depth samples inside a centered window covering [centerFraction] of
      * each dimension, converted mm→meters. Returns 0.0 when no valid samples (sentinel).
