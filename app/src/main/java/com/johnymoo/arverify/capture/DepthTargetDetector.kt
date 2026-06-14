@@ -1,5 +1,7 @@
 package com.johnymoo.arverify.capture
 
+import com.johnymoo.arverify.depth.DepthRangeMm
+
 data class DepthTarget(
     val distanceM: Double,
     val coverage: Double,
@@ -17,6 +19,7 @@ object DepthTargetDetector {
         width: Int,
         height: Int,
         roiFraction: Double = 0.56,
+        targetRange: DepthRangeMm? = null,
     ): DepthTarget {
         if (width <= 0 || height <= 0 || depthMm.size < width * height) {
             return DepthTarget(0.0, 0.0, locked = false)
@@ -25,6 +28,31 @@ object DepthTargetDetector {
         if (samples.isEmpty()) return DepthTarget(0.0, 0.0, locked = false)
 
         samples.sort()
+        if (targetRange != null) {
+            val targetSamples = samples
+                .filter { it in targetRange.minMm..targetRange.maxMm }
+                .toMutableList()
+            if (targetSamples.isEmpty()) {
+                val outOfRangeTarget = detectFromSortedSamples(samples)
+                return DepthTarget(
+                    distanceM = outOfRangeTarget.distanceM,
+                    coverage = 0.0,
+                    locked = false,
+                )
+            }
+            val distanceMm = median(targetSamples)
+            val coverage = targetSamples.size.toDouble() / samples.size.toDouble()
+            return DepthTarget(
+                distanceM = distanceMm / 1000.0,
+                coverage = coverage,
+                locked = coverage >= MIN_COVERAGE,
+            )
+        }
+
+        return detectFromSortedSamples(samples)
+    }
+
+    private fun detectFromSortedSamples(samples: MutableList<Int>): DepthTarget {
         val nearAnchor = percentile(samples, 0.01)
         val farAnchor = percentile(samples, 0.90)
         val nearMax = nearAnchor + NEAR_BAND_MM
