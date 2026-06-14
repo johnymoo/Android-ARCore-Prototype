@@ -57,6 +57,32 @@ class CaptureSessionWriter(
         depthGridMm: IntArray, depthW: Int, depthH: Int,
         rgbJpeg: ByteArray, arcoreVersion: String,
     ) {
+        writeRecognition(
+            intrinsics = intrinsics,
+            pose = pose,
+            scaleDistance = VisualScaleEstimator.fallback(
+                arcoreDistanceM = distanceM,
+                arcoreDistanceSource = TargetDistanceSource.DEPTH,
+                visualReferenceStatus = "NOT_EVALUATED",
+            ),
+            depthGridMm = depthGridMm,
+            depthW = depthW,
+            depthH = depthH,
+            rgbJpeg = rgbJpeg,
+            arcoreVersion = arcoreVersion,
+        )
+    }
+
+    fun writeRecognition(
+        intrinsics: CameraIntrinsics,
+        pose: CameraPose,
+        scaleDistance: ScaleDistanceEstimate,
+        depthGridMm: IntArray,
+        depthW: Int,
+        depthH: Int,
+        rgbJpeg: ByteArray,
+        arcoreVersion: String,
+    ) {
         File(dir, "recognition_rgb.jpg").writeBytes(rgbJpeg)
         File(dir, "recognition_depth.png").writeBytes(Depth16PngWriter.encode(depthGridMm, depthW, depthH))
         val meta = ArMetadata(
@@ -65,7 +91,15 @@ class CaptureSessionWriter(
                 imageIntrinsics = intrinsics,
                 depth = DepthDims(depthW, depthH),
                 cameraPose = pose,
-                distanceM = distanceM,
+                distanceM = scaleDistance.distanceM,
+                arcoreDistanceM = scaleDistance.arcoreDistanceM,
+                arcoreDistanceSource = scaleDistance.arcoreDistanceSource.name,
+                visualDistanceM = scaleDistance.visualDistanceM,
+                visualReferenceWidthPx = scaleDistance.visualReferenceWidthPx,
+                visualReferenceWidthMm = scaleDistance.visualReferenceWidthMm,
+                visualReferenceStatus = scaleDistance.visualReferenceStatus,
+                distanceSourceForScale = scaleDistance.distanceSourceForScale.name,
+                distanceConfidence = scaleDistance.distanceConfidence.name,
             ),
             coarseHints = null,
         )
