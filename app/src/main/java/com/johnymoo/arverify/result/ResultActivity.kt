@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.johnymoo.arverify.net.RecognitionStatus
@@ -31,6 +32,7 @@ import com.johnymoo.arverify.ui.theme.ScanForgeTheme
 import com.johnymoo.arverify.ui.theme.SfMuted
 import com.johnymoo.arverify.ui.theme.SfOk
 import com.johnymoo.arverify.ui.theme.SfOkBg
+import org.json.JSONObject
 
 class ResultActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,7 +67,10 @@ class ResultActivity : ComponentActivity() {
                                 Text(
                                     "${r.recognized?.system ?: "-"} · ${r.recognized?.kind ?: "-"} · " +
                                         "${r.recognized?.unitsX ?: "-"}×${r.recognized?.unitsY ?: "-"}",
+                                    modifier = Modifier.weight(1f).padding(end = 8.dp),
                                     style = MaterialTheme.typography.titleMedium,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
                                 )
                                 if (r.status == RecognitionStatus.RECOGNIZED) {
                                     StatusPill("已识别", SfOkBg, SfOk)
@@ -92,7 +97,7 @@ class ResultActivity : ComponentActivity() {
                                         settings.allowFileAccess = true
                                         webViewClient = object : android.webkit.WebViewClient() {
                                             override fun onPageFinished(view: WebView?, url: String?) {
-                                                view?.evaluateJavascript("loadModel('$glbUrl')", null)
+                                                view?.evaluateJavascript("loadModel(${JSONObject.quote(glbUrl)})", null)
                                             }
                                         }
                                         loadUrl("file:///android_asset/viewer.html")
