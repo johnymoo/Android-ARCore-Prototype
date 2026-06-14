@@ -4,9 +4,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -30,9 +32,25 @@ import coil.compose.AsyncImage
 import com.johnymoo.arverify.R
 import com.johnymoo.arverify.session.CaptureLibraryRepository
 import com.johnymoo.arverify.session.CaptureMode
+import com.johnymoo.arverify.session.SessionStatus
 import com.johnymoo.arverify.ui.common.SessionPaths
+import com.johnymoo.arverify.ui.components.SectionCard
+import com.johnymoo.arverify.ui.components.StatusPill
 import com.johnymoo.arverify.ui.nav.Routes
+import com.johnymoo.arverify.ui.theme.SfOk
+import com.johnymoo.arverify.ui.theme.SfOkBg
+import com.johnymoo.arverify.ui.theme.SfWait
+import com.johnymoo.arverify.ui.theme.SfWaitBg
 import java.io.File
+
+private fun sessionPill(status: SessionStatus): Triple<String, androidx.compose.ui.graphics.Color, androidx.compose.ui.graphics.Color> =
+    when (status) {
+        SessionStatus.RECOGNIZED -> Triple("已识别", SfOkBg, SfOk)
+        SessionStatus.EXPORTED -> Triple("已导出", SfOkBg, SfOk)
+        SessionStatus.PENDING_UPLOAD -> Triple("待上传", SfWaitBg, SfWait)
+        SessionStatus.NEEDS_MEASUREMENT -> Triple("待测量", SfWaitBg, SfWait)
+        SessionStatus.FAILED -> Triple("失败", SfWaitBg, SfWait)
+    }
 
 @Composable
 fun SessionDetailScreen(nav: NavController, dirPath: String) {
@@ -48,16 +66,25 @@ fun SessionDetailScreen(nav: NavController, dirPath: String) {
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         val r = session.recognized
-        Text(
-            r?.let { "${it.system ?: "-"} · ${it.kind ?: "-"} · ${it.unitsX ?: "-"}×${it.unitsY ?: "-"}" }
-                ?: session.partId,
-            style = MaterialTheme.typography.titleMedium,
-        )
-        Text(
-            r?.let { "pitch ${it.pitchMm ?: "-"}mm · 置信度 ${it.confidence ?: "-"}" } ?: "通用采集 · ${session.frames.size} 帧",
-            style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 2.dp, bottom = 10.dp),
-        )
+        SectionCard {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Text(
+                    r?.let { "${it.system ?: "-"} · ${it.kind ?: "-"} · ${it.unitsX ?: "-"}×${it.unitsY ?: "-"}" }
+                        ?: session.partId,
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                val (t, bg, fg) = sessionPill(session.status)
+                StatusPill(t, bg, fg)
+            }
+            Text(
+                r?.let { "pitch ${it.pitchMm ?: "-"}mm · 置信度 ${it.confidence ?: "-"}" }
+                    ?: "通用采集 · ${session.frames.size} 帧",
+                style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
+        Spacer(Modifier.height(10.dp))
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
