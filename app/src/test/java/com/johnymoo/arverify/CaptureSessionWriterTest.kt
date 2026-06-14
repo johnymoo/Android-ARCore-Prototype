@@ -10,7 +10,11 @@ import com.johnymoo.arverify.capture.TargetDistanceSource
 import com.johnymoo.arverify.depth.DepthRangeMm
 import com.johnymoo.arverify.metadata.CameraIntrinsics
 import com.johnymoo.arverify.metadata.CameraPose
+import com.johnymoo.arverify.session.CaptureLibraryRepository
 import com.johnymoo.arverify.session.CaptureMode
+import com.johnymoo.arverify.session.RecognizedSummary
+import com.johnymoo.arverify.session.SessionManifestCodec
+import com.johnymoo.arverify.session.SessionStatus
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -49,6 +53,51 @@ class CaptureSessionWriterTest {
             .fromJson(original.dir.resolve(com.johnymoo.arverify.session.CaptureLibraryRepository.MANIFEST).readText())!!
         assertEquals("part-resume", parsed.partId)
         assertEquals(3, parsed.frames.size)
+    }
+
+    @Test fun appendingToRecognizedSessionPreservesRecognizedSummaryAndMarksPendingUpload() {
+        val root = tmp.newFolder("captures")
+        val repo = CaptureLibraryRepository(root)
+        val original = CaptureSessionWriter(
+            rootDir = root,
+            partId = "part-recognized",
+            mode = CaptureMode.RECOGNITION,
+            createdAtEpochMs = 1234L,
+            deviceModel = "PLG110",
+            depthRange = DepthRangeMm(150, 700),
+            repo = repo,
+        )
+        original.addFrame(CaptureSlot.TOP, byteArrayOf(1), null)
+        repo.writeManifest(
+            original.dir,
+            original.snapshot(SessionStatus.RECOGNIZED).copy(
+                recognized = RecognizedSummary(
+                    system = "lego",
+                    kind = "brick",
+                    unitsX = 2,
+                    unitsY = 4,
+                    pitchMm = 8.0,
+                    confidence = 0.91,
+                )
+            )
+        )
+
+        val resumed = CaptureSessionWriter.resume(
+            sessionDir = original.dir,
+            depthRange = DepthRangeMm(150, 700),
+            repo = repo,
+        )
+        resumed.addFrame(CaptureSlot.ANGLE, byteArrayOf(2), null)
+
+        val parsed = SessionManifestCodec
+            .fromJson(original.dir.resolve(CaptureLibraryRepository.MANIFEST).readText())!!
+        assertEquals(SessionStatus.PENDING_UPLOAD, parsed.status)
+        assertEquals("lego", parsed.recognized?.system)
+        assertEquals("brick", parsed.recognized?.kind)
+        assertEquals(2, parsed.recognized?.unitsX)
+        assertEquals(4, parsed.recognized?.unitsY)
+        assertEquals(8.0, parsed.recognized?.pitchMm ?: -1.0, 0.0)
+        assertEquals(0.91, parsed.recognized?.confidence ?: -1.0, 0.0)
     }
 
     @Test fun writeRecognitionPersistsVisualScaleMetadata() {

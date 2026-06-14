@@ -7,6 +7,7 @@ import com.johnymoo.arverify.session.CaptureLibraryRepository
 import com.johnymoo.arverify.session.CaptureMode
 import com.johnymoo.arverify.session.CaptureSession
 import com.johnymoo.arverify.session.CapturedFrame
+import com.johnymoo.arverify.session.RecognizedSummary
 import com.johnymoo.arverify.session.SessionManifestCodec
 import com.johnymoo.arverify.session.SessionStatus
 import com.johnymoo.arverify.imaging.Depth16PngWriter
@@ -29,6 +30,7 @@ class CaptureSessionWriter(
     private val repo: CaptureLibraryRepository = CaptureLibraryRepository(rootDir),
     existingDir: File? = null,
     initialFrames: List<CapturedFrame> = emptyList(),
+    private val recognized: RecognizedSummary? = null,
 ) {
     val dir: File = existingDir ?: File(rootDir, "${partId}_$createdAtEpochMs").apply { mkdirs() }
     private val frames = initialFrames.toMutableList()
@@ -112,7 +114,7 @@ class CaptureSessionWriter(
     }
 
     fun snapshot(status: SessionStatus): CaptureSession =
-        CaptureSession(partId, mode, createdAtEpochMs, deviceModel, status, frames.toList())
+        CaptureSession(partId, mode, createdAtEpochMs, deviceModel, status, frames.toList(), recognized)
 
     private fun rewriteManifest(status: SessionStatus) = repo.writeManifest(dir, snapshot(status))
 
@@ -139,6 +141,7 @@ class CaptureSessionWriter(
                 repo = repo,
                 existingDir = sessionDir,
                 initialFrames = session.frames,
+                recognized = session.recognized,
             )
         }
     }

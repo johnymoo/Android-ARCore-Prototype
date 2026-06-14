@@ -42,7 +42,7 @@ class ScanCaptureActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val mode = if (intent.getStringExtra(EXTRA_MODE) == "GENERAL") CaptureMode.GENERAL else CaptureMode.RECOGNITION
+        val requestedMode = if (intent.getStringExtra(EXTRA_MODE) == "GENERAL") CaptureMode.GENERAL else CaptureMode.RECOGNITION
         val resumeDir = intent.getStringExtra(EXTRA_RESUME_DIR)?.let { File(it) }
         val config = AppPrefs(this).load()
         holder.setReferenceModeEnabled(config.visualReferenceModeEnabled)
@@ -56,12 +56,14 @@ class ScanCaptureActivity : ComponentActivity() {
             CaptureSessionWriter(
                 rootDir = SessionPaths.captureRoot(this),
                 partId = "part-" + UUID.randomUUID().toString().take(8),
-                mode = mode,
+                mode = requestedMode,
                 createdAtEpochMs = System.currentTimeMillis(),
                 deviceModel = android.os.Build.MODEL ?: "",
                 depthRange = depthRange,
             )
         }
+        val initialSnapshot = writer.snapshot(SessionStatus.PENDING_UPLOAD)
+        val mode = initialSnapshot.mode
         renderer = CaptureRenderer({ session }, config, mode, holder, writer, windowManager,
             try { packageManager.getPackageInfo("com.google.ar.core", 0).versionName ?: "" } catch (e: Exception) { "" },
             diagnosticsRoot = SessionPaths.diagnosticsRoot(this),
@@ -69,10 +71,9 @@ class ScanCaptureActivity : ComponentActivity() {
             onDiagnosticError = { error -> runOnUiThread { toast("诊断保存失败：${error.message ?: error.javaClass.simpleName}") } },
         )
         if (resumeDir != null) {
-            val snapshot = writer.snapshot(SessionStatus.PENDING_UPLOAD)
             holder.state.value = holder.state.value.copy(
                 modeUi = CaptureModeUi.FREE,
-                frames = snapshot.frames,
+                frames = initialSnapshot.frames,
                 sessionDir = writer.dir.absolutePath,
             )
         }
