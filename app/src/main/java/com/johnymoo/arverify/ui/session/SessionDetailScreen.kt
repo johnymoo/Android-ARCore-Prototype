@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -72,8 +73,11 @@ fun SessionDetailScreen(nav: NavController, dirPath: String) {
                 Text(
                     r?.let { "${it.system ?: "-"} · ${it.kind ?: "-"} · ${it.unitsX ?: "-"}×${it.unitsY ?: "-"}" }
                         ?: session.partId,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 2,
                     style = MaterialTheme.typography.titleMedium,
                 )
+                Spacer(Modifier.width(8.dp))
                 val (t, bg, fg) = sessionPill(session.status)
                 StatusPill(t, bg, fg)
             }
