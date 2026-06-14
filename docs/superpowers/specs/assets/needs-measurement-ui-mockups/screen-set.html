@@ -1,0 +1,197 @@
+<style>
+  .s-wrap { color:#E8EDF5 }
+  .s-gal { display:flex; flex-wrap:wrap; gap:20px; justify-content:center; margin-top:10px }
+  .s-col { display:flex; flex-direction:column; align-items:center; gap:8px }
+  .s-label { color:#9FB0C7; font-size:12px; font-weight:600 }
+  .s-ph { width:270px; background:#0E1320; border:1px solid #1b2433; border-radius:22px; overflow:hidden; font-size:12px }
+  .s-sb { display:flex; justify-content:space-between; padding:7px 15px 3px; color:#9FB0C7; font-size:10px }
+  .s-bar { display:flex; align-items:center; gap:10px; padding:11px 14px; border-bottom:1px solid #1b2433; font-weight:700; font-size:14px }
+  .s-bk { color:#9FB0C7; font-weight:400; font-size:16px }
+  .s-bd { padding:14px; display:flex; flex-direction:column; gap:11px }
+  .s-card { background:#161D2B; border:1px solid #243042; border-radius:14px; padding:13px }
+  .s-pill { border-radius:20px; padding:2px 9px; font-size:10px; white-space:nowrap }
+  .s-ok { background:#163D2A; color:#56D39A } .s-wait{ background:#3D3416; color:#E3C156 }
+  .s-muted { color:#9FB0C7 } .s-cap{ color:#9FB0C7; font-size:10px }
+  .s-chip { border:1px solid #243042; border-radius:16px; padding:4px 11px; font-size:11px; color:#9FB0C7 }
+  .s-chip.on { background:#0c2b25; color:#1ED7B5; border-color:#1ED7B5 }
+  .s-btn { border-radius:11px; padding:10px; text-align:center; font-weight:700; flex:1 }
+  .s-prim { background:#1ED7B5; color:#04201A } .s-ghost{ border:1px solid #243042; color:#E8EDF5 }
+  .s-row { display:flex; align-items:center; gap:10px }
+  .s-thumb { width:42px; height:42px; border-radius:9px; background:#243042; flex-shrink:0 }
+  .s-grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:6px }
+  .s-fr { aspect-ratio:1.2; background:linear-gradient(135deg,#2a3a4d,#1a2433); border-radius:8px }
+  .s-srow { display:flex; align-items:center; justify-content:space-between; padding:11px 0; border-bottom:1px solid #1b2433 }
+</style>
+
+<div class="s-wrap">
+<h2>重设计屏幕全集 · 风格 A（精致扫描）</h2>
+<p class="subtitle">统一顶栏 + 返回箭头 + 避开状态栏 + 状态药丸 + 间距节奏。逐屏看一下，有要改的告诉我；都 OK 我就写合并版方案。</p>
+
+<!-- ============ Featured: Capture overlay ============ -->
+<h3 style="margin-top:6px">① 采集页（识别采集 · 实时深度叠加）</h3>
+<div class="s-col" style="align-items:flex-start">
+  <div class="s-ph" style="width:300px;background:#05080d">
+    <div class="s-sb"><span>9:41</span><span>📶 🔋</span></div>
+    <!-- camera area -->
+    <div style="position:relative;height:430px;background:
+        radial-gradient(circle at 50% 38%, #16323a 0%, #0b1117 60%),
+        linear-gradient(180deg,#0d141b,#0a0f15)">
+      <!-- top overlay -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px">
+        <span class="s-bk">‹</span>
+        <div style="display:flex;background:#0b1117aa;border:1px solid #243042;border-radius:18px;overflow:hidden">
+          <span style="padding:4px 12px;background:#1ED7B5;color:#04201A;font-weight:700">向导</span>
+          <span style="padding:4px 12px;color:#9FB0C7">自由</span>
+        </div>
+        <span class="s-chip on">深度 ●</span>
+      </div>
+      <!-- recognition frame -->
+      <div style="position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);width:170px;height:130px;border:2px dashed #1ED7B5;border-radius:10px;display:flex;align-items:flex-end;justify-content:center">
+        <span style="background:#04201Acc;color:#5af0d4;font-size:10px;border-radius:8px;padding:2px 8px;margin-bottom:-12px">距离 0.21m ✓ 框内覆盖 ✓</span>
+      </div>
+      <!-- quality chips -->
+      <div style="position:absolute;top:64px;left:0;right:0;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:0 10px">
+        <span class="s-pill s-ok">追踪 ✓</span><span class="s-pill s-ok">距离 ✓</span><span class="s-pill s-ok">清晰 ✓</span><span class="s-pill s-ok">焦点 ✓</span>
+      </div>
+      <!-- review strip -->
+      <div style="position:absolute;left:12px;bottom:74px;display:flex;flex-direction:column;gap:5px">
+        <div style="width:38px;height:38px;border-radius:7px;background:#243042;border:1px solid #1ED7B5"></div>
+        <div style="width:38px;height:38px;border-radius:7px;background:#243042"></div>
+        <div style="width:38px;height:38px;border-radius:7px;background:#243042"></div>
+      </div>
+      <!-- depth legend -->
+      <div style="position:absolute;right:12px;bottom:78px;text-align:center">
+        <div style="width:14px;height:90px;border-radius:7px;background:linear-gradient(#ff6b4a,#ffd166,#4ad6ff)"></div>
+        <div class="s-cap" style="margin-top:3px">近<br>远</div>
+      </div>
+      <!-- shutter + action -->
+      <div style="position:absolute;left:0;right:0;bottom:14px;display:flex;align-items:center;justify-content:center;gap:26px">
+        <div style="width:58px;height:58px;border-radius:50%;border:4px solid #E8EDF5;background:#ffffff22"></div>
+        <span class="s-pill" style="position:absolute;right:14px;background:#1ED7B5;color:#04201A;font-weight:700;padding:8px 12px;border-radius:12px">上传 4/4 →</span>
+      </div>
+    </div>
+  </div>
+  <div class="s-label" style="max-width:300px">分段 向导/自由 · 深度热力开关（核心）· 中心识别框 · 四项质量药丸（不达标也可强拍）· 左下回看条 · 右侧色标 · 大快门 + 「上传 N/4」。通用采集同骨架，去识别框、主行动改「导出」。</div>
+</div>
+
+<!-- ============ Gallery ============ -->
+<div class="s-gal">
+
+  <!-- Library -->
+  <div class="s-col">
+    <div class="s-label">② 采集库</div>
+    <div class="s-ph">
+      <div class="s-sb"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="s-bar">采集库</div>
+      <div class="s-bd">
+        <div class="s-row" style="gap:7px;flex-wrap:wrap">
+          <span class="s-chip on">全部</span><span class="s-chip">已识别</span><span class="s-chip">待测量</span><span class="s-chip">通用</span>
+        </div>
+        <div class="s-card s-row"><div class="s-thumb"></div><div style="flex:1"><div style="font-weight:600">feile · brick · 2×4</div><div class="s-cap">pitch 16.1mm · 6 帧 · 今天</div></div><span class="s-pill s-ok">已识别</span></div>
+        <div class="s-card s-row"><div class="s-thumb"></div><div style="flex:1"><div style="font-weight:600">part-e6ac1916</div><div class="s-cap">5 帧 · 待测量</div></div><span class="s-pill s-wait">待测量</span></div>
+        <div class="s-card s-row"><div class="s-thumb"></div><div style="flex:1"><div style="font-weight:600">通用采集 · 12 帧</div><div class="s-cap">RGB+深度 · 昨天</div></div><span class="s-pill" style="background:#1b2433;color:#9FB0C7">通用</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Session Detail -->
+  <div class="s-col">
+    <div class="s-label">③ 会话详情</div>
+    <div class="s-ph">
+      <div class="s-sb"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="s-bar"><span class="s-bk">‹</span> 会话详情</div>
+      <div class="s-bd">
+        <div class="s-card">
+          <div class="s-row" style="justify-content:space-between"><b>feile · brick · 2×4</b><span class="s-pill s-ok">已识别</span></div>
+          <div class="s-cap" style="margin-top:4px">pitch 16.1mm · 置信度 0.93 · OPPO PLG110</div>
+        </div>
+        <div class="s-grid3">
+          <div class="s-fr"></div><div class="s-fr"></div><div class="s-fr"></div>
+          <div class="s-fr"></div><div class="s-fr"></div><div class="s-fr"></div>
+        </div>
+        <div class="s-row" style="gap:8px"><div class="s-btn s-prim">预览模型</div><div class="s-btn s-ghost">重新上传</div></div>
+        <div class="s-btn s-ghost">删除</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frame Viewer -->
+  <div class="s-col">
+    <div class="s-label">④ 帧查看器（深度态）</div>
+    <div class="s-ph" style="background:#05080d">
+      <div class="s-sb"><span>9:41</span><span>📶 🔋</span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px">
+        <span class="s-bk">‹</span>
+        <div style="display:flex;background:#0b1117;border:1px solid #243042;border-radius:16px;overflow:hidden;font-size:11px">
+          <span style="padding:4px 11px;color:#9FB0C7">RGB</span><span style="padding:4px 11px;background:#1ED7B5;color:#04201A;font-weight:700">深度</span>
+        </div>
+        <span class="s-cap">3 / 6</span>
+      </div>
+      <div style="height:300px;margin:0 12px;border-radius:12px;background:
+        radial-gradient(circle at 50% 45%, #ff6b4a, #ffd166 38%, #4ad6ff 80%)"></div>
+      <div class="s-row" style="justify-content:space-between;padding:10px 14px">
+        <span class="s-cap">近暖远冷 · 0.18–0.32m</span><span class="s-cap">清晰度 265</span>
+      </div>
+      <div class="s-row" style="gap:8px;padding:0 14px 16px">
+        <div class="s-btn s-ghost">删除</div><div class="s-btn s-ghost">重拍</div><div class="s-btn s-ghost">‹</div><div class="s-btn s-ghost">›</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings -->
+  <div class="s-col">
+    <div class="s-label">⑤ 设置</div>
+    <div class="s-ph">
+      <div class="s-sb"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="s-bar">设置</div>
+      <div class="s-bd">
+        <div class="s-card" style="padding:0 13px">
+          <div class="s-srow"><span>服务器地址</span><span class="s-muted">192.168.88.75:5173 ›</span></div>
+          <div class="s-srow"><span>采集参数</span><span class="s-muted">距离 / 锐度 ›</span></div>
+          <div class="s-srow"><span>调试存图</span><span style="width:34px;height:18px;border-radius:10px;background:#1ED7B5;position:relative"><span style="position:absolute;right:2px;top:2px;width:14px;height:14px;border-radius:50%;background:#04201A"></span></span></div>
+          <div class="s-srow" style="border-bottom:none"><span>设备诊断</span><span class="s-muted">›</span></div>
+        </div>
+        <div class="s-cap" style="text-align:center">拾模 ScanForge · v0.3</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Diagnostics -->
+  <div class="s-col">
+    <div class="s-label">⑥ 设备诊断</div>
+    <div class="s-ph">
+      <div class="s-sb"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="s-bar"><span class="s-bk">‹</span> 设备诊断</div>
+      <div class="s-bd">
+        <div class="s-card s-row" style="justify-content:space-between"><span>ARCore 支持</span><span class="s-pill s-ok">✓ 支持</span></div>
+        <div class="s-card s-row" style="justify-content:space-between"><span>Depth API</span><span class="s-pill s-ok">✓ 支持</span></div>
+        <div class="s-card">
+          <div class="s-muted" style="font-size:11px">推荐路线</div>
+          <div style="font-weight:600;margin-top:3px">引导识别采集（主线）</div>
+        </div>
+        <div class="s-card s-row" style="justify-content:space-between"><span class="s-muted">设备</span><span>OPPO PLG110 · ARCore 1.54</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div class="s-col">
+    <div class="s-label">⑦ 识别结果（recognized）</div>
+    <div class="s-ph">
+      <div class="s-sb"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="s-bar"><span class="s-bk">‹</span> 识别结果</div>
+      <div class="s-bd">
+        <div class="s-card">
+          <div class="s-row" style="justify-content:space-between"><b>feile · brick · 2×4</b><span class="s-pill s-ok">已识别</span></div>
+          <div class="s-cap" style="margin-top:4px">pitch 16.1mm · 置信度 0.93</div>
+        </div>
+        <div style="height:150px;border-radius:12px;background:radial-gradient(circle at 50% 45%,#16323a,#0b1117);display:flex;align-items:center;justify-content:center">
+          <div style="width:70px;height:70px;transform:rotate(12deg);background:linear-gradient(135deg,#1ED7B5,#0c8f78);border-radius:10px;box-shadow:0 10px 30px -10px #1ED7B5"></div>
+        </div>
+        <div class="s-row" style="gap:8px"><div class="s-btn s-prim">预览模型</div><div class="s-btn s-ghost">完成</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>

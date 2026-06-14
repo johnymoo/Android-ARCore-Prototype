@@ -1,0 +1,94 @@
+<h2>这 5 个测量值，画出来对不对？</h2>
+<p class="subtitle">验收标准里最关键的一条：用户不看开发文档也能知道每个值量哪里。先确认下面的定义和卡尺位置是否正确，再谈页面怎么排。</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">俯视图（凸点面）— 量 1A / 1B / ③</div>
+    <div class="mockup-body" style="background:#fff;padding:8px">
+      <svg viewBox="0 0 420 300" width="100%" style="display:block">
+        <!-- brick outline -->
+        <rect x="40" y="70" width="320" height="170" rx="10" fill="#f1f3f6" stroke="#9aa3af" stroke-width="2"/>
+        <!-- studs 4x2 -->
+        <g fill="#dfe4ec" stroke="#8a93a3" stroke-width="2">
+          <circle cx="90"  cy="120" r="28"/><circle cx="170" cy="120" r="28"/>
+          <circle cx="230" cy="120" r="28"/><circle cx="310" cy="120" r="28"/>
+          <circle cx="90"  cy="190" r="28"/><circle cx="170" cy="190" r="28"/>
+          <circle cx="230" cy="190" r="28"/><circle cx="310" cy="190" r="28"/>
+        </g>
+
+        <!-- 1A outer pitch: outer edge of leftmost stud -> outer edge of rightmost stud -->
+        <g stroke="#e8590c" stroke-width="2.5" fill="#e8590c">
+          <line x1="62" y1="40" x2="338" y2="40"/>
+          <line x1="62" y1="34" x2="62" y2="58"/>
+          <line x1="338" y1="34" x2="338" y2="58"/>
+          <text x="200" y="30" text-anchor="middle" font-size="16" font-weight="700">1A 外缘总跨距</text>
+        </g>
+
+        <!-- 1B inner pitch: gap between two adjacent studs -->
+        <g stroke="#1c7ed6" stroke-width="2.5" fill="#1c7ed6">
+          <line x1="118" y1="120" x2="142" y2="120"/>
+          <line x1="118" y1="108" x2="118" y2="132"/>
+          <line x1="142" y1="108" x2="142" y2="132"/>
+          <text x="130" y="258" text-anchor="middle" font-size="15" font-weight="700">1B 相邻最窄缝</text>
+          <line x1="130" y1="132" x2="130" y2="244" stroke-dasharray="3,3" stroke-width="1.5"/>
+        </g>
+
+        <!-- ③ stud diameter -->
+        <g stroke="#2f9e44" stroke-width="2.5" fill="#2f9e44">
+          <line x1="282" y1="190" x2="338" y2="190"/>
+          <line x1="282" y1="178" x2="282" y2="202"/>
+          <line x1="338" y1="178" x2="338" y2="202"/>
+          <text x="310" y="258" text-anchor="middle" font-size="15" font-weight="700">③ 凸点外径</text>
+          <line x1="310" y1="218" x2="310" y2="244" stroke-dasharray="3,3" stroke-width="1.5"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">侧视图 — 量 ② / ④</div>
+    <div class="mockup-body" style="background:#fff;padding:8px">
+      <svg viewBox="0 0 420 300" width="100%" style="display:block">
+        <!-- studs on top -->
+        <g fill="#dfe4ec" stroke="#8a93a3" stroke-width="2">
+          <rect x="120" y="92" width="48" height="28" rx="6"/>
+          <rect x="200" y="92" width="48" height="28" rx="6"/>
+          <rect x="280" y="92" width="48" height="28" rx="6"/>
+        </g>
+        <!-- brick body -->
+        <rect x="90" y="120" width="270" height="120" rx="6" fill="#f1f3f6" stroke="#9aa3af" stroke-width="2"/>
+        <!-- baseline -->
+        <line x1="70" y1="240" x2="380" y2="240" stroke="#adb5bd" stroke-width="2" stroke-dasharray="4,4"/>
+
+        <!-- ② net height: base -> top of body -->
+        <g stroke="#7048e8" stroke-width="2.5" fill="#7048e8">
+          <line x1="64" y1="120" x2="64" y2="240"/>
+          <line x1="58" y1="120" x2="76" y2="120"/>
+          <line x1="58" y1="240" x2="76" y2="240"/>
+          <text x="40" y="184" text-anchor="middle" font-size="15" font-weight="700" transform="rotate(-90 40 184)">② 砖体净高（不含凸点）</text>
+        </g>
+
+        <!-- ④ total height: base -> top of stud -->
+        <g stroke="#d6336c" stroke-width="2.5" fill="#d6336c">
+          <line x1="392" y1="92" x2="392" y2="240"/>
+          <line x1="386" y1="92" x2="404" y2="92"/>
+          <line x1="386" y1="240" x2="404" y2="240"/>
+          <text x="416" y="166" text-anchor="middle" font-size="15" font-weight="700" transform="rotate(-90 416 166)">④ 总高（到凸点顶）</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>对应后端字段</h3>
+  <table style="width:100%;border-collapse:collapse;font-size:14px">
+    <tr style="text-align:left;color:#868e96"><th style="padding:6px 8px">编号</th><th>后端字段</th><th>中文名</th><th>量哪里</th></tr>
+    <tr style="border-top:1px solid #e9ecef"><td style="padding:6px 8px;color:#e8590c;font-weight:700">1A</td><td><code>outer_pitch_mm</code></td><td>外缘总跨距</td><td>两端最外侧凸点的外缘到外缘</td></tr>
+    <tr style="border-top:1px solid #e9ecef"><td style="padding:6px 8px;color:#1c7ed6;font-weight:700">1B</td><td><code>inner_pitch_mm</code></td><td>相邻最窄缝</td><td>相邻两凸点之间最窄的缝隙</td></tr>
+    <tr style="border-top:1px solid #e9ecef"><td style="padding:6px 8px;color:#2f9e44;font-weight:700">③</td><td><code>stud_diameter_mm</code></td><td>凸点外径</td><td>任一凸点的外径</td></tr>
+    <tr style="border-top:1px solid #e9ecef"><td style="padding:6px 8px;color:#7048e8;font-weight:700">②</td><td><code>brick_height_net_mm</code></td><td>砖体净高</td><td>底面到砖体顶面，不含凸点</td></tr>
+    <tr style="border-top:1px solid #e9ecef"><td style="padding:6px 8px;color:#d6336c;font-weight:700">④</td><td><code>brick_height_total_mm</code></td><td>总高</td><td>底面到凸点顶</td></tr>
+  </table>
+  <p class="subtitle" style="margin-top:10px">校验规则会用到：<b>1A &gt; 1B</b>、<b>④ &gt; ②</b>、以及 <b>|(1A − 1B)/2 − ③| ≤ 0.5mm</b> 时给黄色提醒（互消误差自检）。</p>
+</div>

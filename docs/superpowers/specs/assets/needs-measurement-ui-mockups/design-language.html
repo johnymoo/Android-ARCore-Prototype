@@ -1,0 +1,114 @@
+<h2>视觉语言 —— 两个「质感」方向</h2>
+<p class="subtitle">都保留拾模 / ScanForge 的深色 + 青色身份，差别在质感处理。下面是重设计后的首页，点一个你喜欢的方向，我会套用到每一屏。</p>
+
+<div class="cards">
+
+  <!-- ============ Direction A: Refined Scan ============ -->
+  <div class="card" data-choice="A" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#05070c;padding:14px">
+      <div style="max-width:300px;margin:0 auto;background:#0E1320;border-radius:22px;overflow:hidden;border:1px solid #1b2433;font-size:12px;color:#E8EDF5">
+        <!-- status bar -->
+        <div style="display:flex;justify-content:space-between;padding:7px 16px 3px;color:#9FB0C7;font-size:11px">
+          <span>9:41</span><span>📶 🔋</span>
+        </div>
+        <!-- top app bar (solid, hairline) -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid #1b2433">
+          <div><b style="font-size:15px">拾模</b><span style="color:#9FB0C7;font-size:10px;letter-spacing:1px">  SCANFORGE</span></div>
+          <span style="color:#9FB0C7">⚙</span>
+        </div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+          <!-- primary entry -->
+          <div style="background:#161D2B;border:1px solid #243042;border-radius:16px;padding:15px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:38px;height:38px;border-radius:11px;background:#0c2b25;display:flex;align-items:center;justify-content:center;color:#1ED7B5;font-size:18px">◎</div>
+              <div><div style="color:#1ED7B5;font-weight:700">识别采集</div><div style="color:#9FB0C7;font-size:11px">标准积木 → 自动识别建模</div></div>
+            </div>
+          </div>
+          <!-- secondary entry -->
+          <div style="background:#161D2B;border:1px solid #1b2433;border-radius:16px;padding:15px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:38px;height:38px;border-radius:11px;background:#1b2433;display:flex;align-items:center;justify-content:center;color:#9FB0C7;font-size:18px">⬚</div>
+              <div><div style="font-weight:700">通用采集</div><div style="color:#9FB0C7;font-size:11px">RGB + 深度 + 点云，本地导出</div></div>
+            </div>
+          </div>
+          <!-- recent header -->
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px">
+            <b>最近采集</b><span style="color:#1ED7B5;font-size:11px">全部 ›</span>
+          </div>
+          <!-- list row -->
+          <div style="display:flex;align-items:center;gap:10px;background:#11172180;border-radius:12px;padding:9px">
+            <div style="width:42px;height:42px;border-radius:9px;background:#243042"></div>
+            <div style="flex:1"><div style="font-weight:600">feile · brick · 2×4</div><div style="color:#9FB0C7;font-size:10px">pitch 16.1mm · 6 帧</div></div>
+            <span style="background:#163D2A;color:#56D39A;border-radius:20px;padding:2px 9px;font-size:10px">已识别</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:#11172180;border-radius:12px;padding:9px">
+            <div style="width:42px;height:42px;border-radius:9px;background:#243042"></div>
+            <div style="flex:1"><div style="font-weight:600">part-e6ac1916</div><div style="color:#9FB0C7;font-size:10px">5 帧 · 待测量</div></div>
+            <span style="background:#3D3416;color:#E3C156;border-radius:20px;padding:2px 9px;font-size:10px">待测量</span>
+          </div>
+        </div>
+        <!-- bottom nav -->
+        <div style="display:flex;justify-content:space-around;padding:10px 0 14px;border-top:1px solid #1b2433;color:#9FB0C7">
+          <span style="color:#1ED7B5">⌂ 首页</span><span>▦ 采集库</span><span>⚙ 设置</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A · 精致扫描（克制 / 推荐）</h3>
+      <p>实色表面 + 1px 描边 + 发丝分隔线，留白充足，状态用扁平药丸。干净、专业、信息优先；最稳，真机还原度最高。</p>
+    </div>
+  </div>
+
+  <!-- ============ Direction B: Depth Glass ============ -->
+  <div class="card" data-choice="B" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#05070c;padding:14px">
+      <div style="max-width:300px;margin:0 auto;background:linear-gradient(180deg,#0A1018,#0E1320 40%);border-radius:22px;overflow:hidden;border:1px solid #15324a;font-size:12px;color:#E8EDF5;box-shadow:0 0 0 1px #0a141e">
+        <div style="display:flex;justify-content:space-between;padding:7px 16px 3px;color:#9FB0C7;font-size:11px">
+          <span>9:41</span><span>📶 🔋</span>
+        </div>
+        <!-- translucent glow app bar -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:linear-gradient(180deg,#10243033,transparent);border-bottom:1px solid #16384a">
+          <div><b style="font-size:15px;color:#bdfaee">拾模</b><span style="color:#5d7e8f;font-size:10px;letter-spacing:1px">  SCANFORGE</span></div>
+          <span style="color:#1ED7B5">⚙</span>
+        </div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:13px">
+          <!-- primary entry: glow gradient -->
+          <div style="background:linear-gradient(135deg,#0d3b33,#10202b);border:1px solid #1ED7B555;border-radius:18px;padding:16px;box-shadow:0 6px 20px -8px #1ED7B566">
+            <div style="display:flex;align-items:center;gap:11px">
+              <div style="width:40px;height:40px;border-radius:12px;background:radial-gradient(circle,#1ED7B5,#0c8f78);display:flex;align-items:center;justify-content:center;color:#04201A;font-size:19px">◎</div>
+              <div><div style="color:#5af0d4;font-weight:700">识别采集</div><div style="color:#9fc7bf;font-size:11px">标准积木 → 自动识别建模</div></div>
+            </div>
+          </div>
+          <div style="background:linear-gradient(135deg,#18222f,#11171f);border:1px solid #243042;border-radius:18px;padding:16px;box-shadow:0 6px 18px -10px #000">
+            <div style="display:flex;align-items:center;gap:11px">
+              <div style="width:40px;height:40px;border-radius:12px;background:#202c3b;display:flex;align-items:center;justify-content:center;color:#9FB0C7;font-size:19px">⬚</div>
+              <div><div style="font-weight:700">通用采集</div><div style="color:#9FB0C7;font-size:11px">RGB + 深度 + 点云，本地导出</div></div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px">
+            <b>最近采集</b><span style="color:#1ED7B5;font-size:11px">全部 ›</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#161f2b,#11171f);border:1px solid #1b2433;border-radius:14px;padding:10px;box-shadow:0 4px 14px -10px #000">
+            <div style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#2a3a4d,#1a2433)"></div>
+            <div style="flex:1"><div style="font-weight:600">feile · brick · 2×4</div><div style="color:#9FB0C7;font-size:10px">pitch 16.1mm · 6 帧</div></div>
+            <span style="background:#0f3b2a;color:#5af0c0;border:1px solid #1ED7B544;border-radius:20px;padding:2px 9px;font-size:10px">已识别</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#161f2b,#11171f);border:1px solid #1b2433;border-radius:14px;padding:10px;box-shadow:0 4px 14px -10px #000">
+            <div style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#2a3a4d,#1a2433)"></div>
+            <div style="flex:1"><div style="font-weight:600">part-e6ac1916</div><div style="color:#9FB0C7;font-size:10px">5 帧 · 待测量</div></div>
+            <span style="background:#3a3112;color:#f0d36b;border:1px solid #E3C15644;border-radius:20px;padding:2px 9px;font-size:10px">待测量</span>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-around;padding:11px 0 15px;background:linear-gradient(0deg,#0a141e,transparent);border-top:1px solid #16384a;color:#5d7e8f">
+          <span style="color:#1ED7B5">⌂ 首页</span><span>▦ 采集库</span><span>⚙ 设置</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B · 深度质感（更有层次）</h3>
+      <p>渐变表面 + 柔和投影 + 青色辉光描边，主卡片有发光感，更"高级扫描仪"。视觉更厚，但需真机微调阴影/辉光，还原成本略高。</p>
+    </div>
+  </div>
+
+</div>
+<p class="subtitle" style="margin-top:14px">两者都会统一加上：顶栏（标题 + 返回箭头）、正确避开状态栏、状态药丸、空态、间距节奏。<b>返回箭头</b>会出现在所有非 Tab 子页（详情/测量/结果等）。我倾向 <b>A</b>（最稳、真机还原最准），但 B 的质感更强 —— 你定。</p>

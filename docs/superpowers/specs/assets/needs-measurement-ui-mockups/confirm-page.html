@@ -1,0 +1,81 @@
+<h2>建模确认页（第 0 步）长这样对吗？</h2>
+<p class="subtitle">用 issue 里那组真实返回：system=null、kind=brick、22×14、置信度 0.0。关键是<b>不把识别结果当真</b>，让用户自己确认。</p>
+
+<div class="split">
+  <!-- phone mockup -->
+  <div class="mockup">
+    <div class="mockup-header">建模确认页</div>
+    <div class="mockup-body" style="background:#0b0d12;padding:12px">
+      <div style="background:#13161d;border-radius:14px;padding:14px;color:#e7eaf0;font-size:12px">
+
+        <!-- banner -->
+        <div style="background:#3a2a12;border:1px solid #a86a1e;border-radius:10px;padding:10px">
+          <div style="font-weight:700;color:#ffc078">⚠️ 自动识别不可信</div>
+          <div style="color:#d7c4a8;margin-top:3px">本次未能可信识别，需人工测量生成参数化模型。</div>
+          <div style="color:#9a8f7e;margin-top:5px;font-size:11px">后端原因：pitch did not match a known system within tolerance/confidence</div>
+        </div>
+
+        <!-- untrusted recognition, dimmed -->
+        <div style="margin-top:10px;opacity:.55;border:1px dashed #3a3f4a;border-radius:10px;padding:9px">
+          <div style="display:flex;justify-content:space-between">
+            <span style="color:#9aa3af">本次识别（仅供参考）</span>
+            <span style="background:#4a2230;color:#ff8787;border-radius:5px;padding:0 6px;font-size:10px">置信度 0.0 · 不可信</span>
+          </div>
+          <div style="margin-top:4px;color:#cfd4dc">kind=brick · 22 × 14 · pitch 163.7mm</div>
+        </div>
+
+        <!-- system -->
+        <div style="margin-top:12px;font-weight:700">① 选择体系</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+          <span style="border:1px solid #2a2f3a;border-radius:16px;padding:5px 10px">得宝 DUPLO</span>
+          <span style="border:1px solid #2a2f3a;border-radius:16px;padding:5px 10px">乐高 LEGO</span>
+          <span style="border:1px solid #4dabf7;background:#15324a;color:#9ad0ff;border-radius:16px;padding:5px 10px">费乐 FEILE ✓</span>
+          <span style="border:1px solid #2a2f3a;border-radius:16px;padding:5px 10px">通用</span>
+        </div>
+
+        <!-- kind -->
+        <div style="margin-top:12px;font-weight:700">② 选择类型</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+          <span style="border:1px solid #4dabf7;background:#15324a;color:#9ad0ff;border-radius:16px;padding:5px 10px">🧱 标准砖 ✓</span>
+          <span style="border:1px solid #2a2f3a;border-radius:16px;padding:5px 10px">▭ 板</span>
+          <span style="border:1px solid #2a2f3a;border-radius:16px;padding:5px 10px">◼ 瓦片</span>
+          <span style="border:1px solid #2a2f3a;border-radius:16px;padding:5px 10px">◣ 斜面</span>
+        </div>
+
+        <!-- units -->
+        <div style="margin-top:12px;font-weight:700">③ 凸点排数（1–16）</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+          <div style="display:flex;align-items:center;border:1px solid #2a2f3a;border-radius:8px">
+            <span style="padding:6px 11px;color:#9aa3af">−</span><span style="padding:6px 10px;border-left:1px solid #2a2f3a;border-right:1px solid #2a2f3a">2</span><span style="padding:6px 11px;color:#9aa3af">+</span>
+          </div>
+          <span style="color:#9aa3af">×</span>
+          <div style="display:flex;align-items:center;border:1px solid #2a2f3a;border-radius:8px">
+            <span style="padding:6px 11px;color:#9aa3af">−</span><span style="padding:6px 10px;border-left:1px solid #2a2f3a;border-right:1px solid #2a2f3a">4</span><span style="padding:6px 11px;color:#9aa3af">+</span>
+          </div>
+        </div>
+        <div style="color:#ffa8a8;margin-top:5px;font-size:11px">识别给的 22×14 超出 1–16，已忽略，请按实物填写</div>
+
+        <div style="margin-top:14px;text-align:center;background:#1c7ed6;border-radius:9px;padding:9px;font-weight:700">开始测量（5 步）→</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- flow + rationale -->
+  <div class="mockup">
+    <div class="mockup-header">整体兜底流程</div>
+    <div class="mockup-body" style="background:#fff;padding:14px;color:#0f172a;font-size:13px">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="background:#e7f0ff;border-radius:8px;padding:8px"><b>第0步 · 建模确认</b><br><span style="color:#475569">确认 system / kind / units，不信任识别结果</span></div>
+        <div style="text-align:center;color:#94a3b8">↓</div>
+        <div style="background:#fff4e6;border-radius:8px;padding:8px"><b>第1–5步 · 测量向导</b><br><span style="color:#475569">1A → 1B → ③ → ② → ④，每步一个聚焦图 + 输入 + 实时校验</span></div>
+        <div style="text-align:center;color:#94a3b8">↓</div>
+        <div style="background:#e6fcf5;border-radius:8px;padding:8px"><b>提交 · 结果</b><br><span style="color:#475569">multipart → /api/v1/parametric-blocks，显示 job 状态 + 警告，best-effort 预览</span></div>
+      </div>
+      <div style="margin-top:14px;font-size:12px;color:#475569">
+        <b>校验分两档：</b><br>
+        • <span style="color:#c92a2a">红色拦截</span>：非正数 / 非有限 / 1A≤1B / ④≤②<br>
+        • <span style="color:#e8590c">黄色提醒（不拦截）</span>：|(1A−1B)/2 − ③| &gt; 0.5mm
+      </div>
+    </div>
+  </div>
+</div>
