@@ -15,6 +15,9 @@ import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
 import com.google.ar.core.Frame
 import com.google.ar.core.ImageMetadata
+import com.google.ar.core.Plane
+import com.google.ar.core.Point
+import com.google.ar.core.Pose
 import com.google.ar.core.Session
 import com.google.ar.core.TrackingState
 import com.google.ar.core.exceptions.CameraNotAvailableException
@@ -24,6 +27,8 @@ import com.johnymoo.arverify.config.AppPrefs
 import com.johnymoo.arverify.config.CaptureConfig
 import com.johnymoo.arverify.databinding.ActivityCaptureWizardBinding
 import com.johnymoo.arverify.debug.DebugGallerySaver
+import com.johnymoo.arverify.depth.DepthOverlayRange
+import com.johnymoo.arverify.depth.DepthRangeMm
 import com.johnymoo.arverify.imaging.Depth16PngWriter
 import com.johnymoo.arverify.measure.MeasurementWizardActivity
 import com.johnymoo.arverify.metadata.ArMetadata
@@ -52,6 +57,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.UUID
 import java.util.concurrent.Executors
+import kotlin.math.sqrt
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
@@ -64,6 +70,7 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
 
     private val controller = CaptureWizardController()
     private lateinit var config: CaptureConfig
+    private lateinit var depthRange: DepthRangeMm
     private lateinit var prefs: AppPrefs
     private lateinit var gate: FrameQualityGate
     private lateinit var gallerySaver: DebugGallerySaver
@@ -76,6 +83,9 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
     private var topIntrinsics: CameraIntrinsics? = null
     private var topPose: CameraPose? = null
     private var topDistanceM: Double = 0.0
+    private var topDistanceSource: TargetDistanceSource = TargetDistanceSource.NONE
+    private var topScaleDistance: ScaleDistanceEstimate =
+        VisualScaleEstimator.fallback(0.0, TargetDistanceSource.NONE, "NOT_EVALUATED")
     private var topDepthW = 0
     private var topDepthH = 0
 
@@ -97,6 +107,7 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         binding.bottomChrome.applyBottomChromeSystemBarMargins()
         prefs = AppPrefs(this)
         config = prefs.load()
+        depthRange = DepthOverlayRange.fromDistanceBand(config.minDistanceM, config.maxDistanceM)
         gate = FrameQualityGate(config.thresholds())
         gallerySaver = DebugGallerySaver(this)
 
@@ -131,6 +142,7 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
                     c.depthMode = if (s.isDepthModeSupported(Config.DepthMode.AUTOMATIC))
                         Config.DepthMode.AUTOMATIC else Config.DepthMode.DISABLED
                     c.focusMode = Config.FocusMode.AUTO
+                    c.planeFindingMode = Config.PlaneFindingMode.HORIZONTAL_AND_VERTICAL
                     s.configure(c)
                 }
             } catch (e: Exception) {
@@ -196,13 +208,24 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
     private fun evaluateQuality(frame: Frame) {
         var distance = 0.0
         var sharpness = 0.0
+        var targetLocked = false
+        var depthTarget = DepthTarget(distanceM = 0.0, coverage = 0.0, locked = false)
+        val fallbackDistanceM = centerReticleHitDistanceM(frame)
         updateFocusDebug(frame)
         try {
             frame.acquireDepthImage16Bits().use { depth ->
                 val g = ArFrameExtractor.depthGridMm(depth)
-                distance = DepthTargetDetector.detect(g.values, g.width, g.height).distanceM
+                depthTarget = DepthTargetDetector.detect(
+                    g.values,
+                    g.width,
+                    g.height,
+                    targetRange = depthRange,
+                )
             }
         } catch (e: NotYetAvailableException) { /* depth warming up */ }
+        val resolvedTarget = TargetDistanceResolver.resolve(depthTarget, fallbackDistanceM, depthRange)
+        distance = resolvedTarget.distanceM
+        targetLocked = resolvedTarget.locked
         try {
             frame.acquireCameraImage().use { img ->
                 val luma = ArFrameExtractor.lumaGrid(img)
@@ -211,11 +234,18 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         } catch (e: NotYetAvailableException) { /* image not ready */ }
 
         val focusForGate = FocusDistanceModel.gateDistanceMeters(lastFocusMeters, lastAfState)
-        val reason = gate.evaluate(trackingLite(frame), distance, sharpness, focusForGate)
+        val reason = gate.evaluate(trackingLite(frame), distance, sharpness, focusForGate, targetLocked)
         lastQualityReason = reason
         lastReasonOk = reason == QualityReason.OK
         runOnUiThread {
-            binding.tvQuality.text = qualityText(reason, distance, sharpness, lastFocusMeters, lastAfState)
+            binding.tvQuality.text = qualityText(
+                reason,
+                distance,
+                resolvedTarget.source,
+                sharpness,
+                lastFocusMeters,
+                lastAfState,
+            )
             binding.btnCaptureFrame.isEnabled = CaptureButtonPolicy.isEnabled(controller.state.step)
         }
     }
@@ -247,13 +277,15 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
     private fun qualityText(
         reason: QualityReason,
         distanceM: Double,
+        distanceSource: TargetDistanceSource,
         sharpness: Double,
         focusMeters: Double?,
         afState: Int?,
     ): String {
         val d = if (distanceM > 0.0) String.format(Locale.US, "%.2fm", distanceM) else "--"
         val s = String.format(Locale.US, "%.0f", sharpness)
-        val metrics = "深度 $d · ${FocusDistanceModel.debugText(focusMeters, afState)} · 清晰度 $s"
+        val source = if (distanceSource == TargetDistanceSource.HIT_TEST) "平面" else "深度"
+        val metrics = "$source $d · ${FocusDistanceModel.debugText(focusMeters, afState)} · 清晰度 $s"
         return if (reason == QualityReason.OK) metrics else "${reason.messageZh}\n$metrics"
     }
 
@@ -271,16 +303,32 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
             maybeSaveDebugRgb(slot, images.size, rgb)
 
             if (slot == CaptureSlot.TOP) {
+                val fallbackDistanceM = centerReticleHitDistanceM(frame)
+                var depthTarget = DepthTarget(distanceM = 0.0, coverage = 0.0, locked = false)
                 frame.acquireDepthImage16Bits().use { depth ->
                     val g = ArFrameExtractor.depthGridMm(depth)
                     topDepthW = g.width; topDepthH = g.height
-                    topDistanceM = ScaleMath.medianCenterDistanceMeters(g.values, g.width, g.height, 0.2)
+                    depthTarget = DepthTargetDetector.detect(
+                        g.values,
+                        g.width,
+                        g.height,
+                        targetRange = depthRange,
+                    )
                     val png = Depth16PngWriter.encode(g.values, g.width, g.height)
                     topDepthPng = FilePart("recognition_depth.png", "image/png", png)
                 }
+                val resolvedTarget = TargetDistanceResolver.resolve(depthTarget, fallbackDistanceM, depthRange)
+                topDistanceM = resolvedTarget.distanceM
+                topDistanceSource = resolvedTarget.source
                 topRgb = rgbPart
                 topIntrinsics = ArFrameExtractor.intrinsics(frame)
                 topPose = ArFrameExtractor.pose(frame)
+                topScaleDistance = VisualScaleEstimator.estimate(
+                    image = ArFrameExtractor.rgbPixelsFromJpeg(rgb),
+                    intrinsics = topIntrinsics!!,
+                    arcoreDistanceM = topDistanceM,
+                    arcoreDistanceSource = topDistanceSource,
+                )
             }
             controller.record(slot)
             runOnUiThread { refreshStepUi() }
@@ -298,6 +346,33 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         if (gallerySaver.saveJpeg(rgb, name)) {
             runOnUiThread { toast("原图已保存到相册：$name") }
         }
+    }
+
+    private fun centerReticleHitDistanceM(frame: Frame): Double? {
+        if (viewportWidth <= 0 || viewportHeight <= 0 ||
+            frame.camera.trackingState != TrackingState.TRACKING
+        ) return null
+        val cameraPose = frame.camera.pose
+        return ReticleHitTestSampler.samplePoints(viewportWidth, viewportHeight)
+            .mapNotNull { point ->
+                frame.hitTest(point.x, point.y).firstNotNullOfOrNull { hit ->
+                    val trackable = hit.trackable
+                    val valid = when (trackable) {
+                        is Plane -> trackable.trackingState == TrackingState.TRACKING &&
+                            trackable.isPoseInPolygon(hit.hitPose)
+                        is Point -> trackable.trackingState == TrackingState.TRACKING
+                        else -> false
+                    }
+                    if (valid) distanceBetween(cameraPose, hit.hitPose) else null
+                }
+            }.minOrNull()
+    }
+
+    private fun distanceBetween(a: Pose, b: Pose): Double {
+        val dx = b.tx() - a.tx()
+        val dy = b.ty() - a.ty()
+        val dz = b.tz() - a.tz()
+        return sqrt((dx * dx + dy * dy + dz * dz).toDouble())
     }
 
     private fun refreshStepUi() {
@@ -337,7 +412,15 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
                 imageIntrinsics = intr,
                 depth = DepthDims(topDepthW, topDepthH),
                 cameraPose = pose,
-                distanceM = topDistanceM,
+                distanceM = topScaleDistance.distanceM,
+                arcoreDistanceM = topScaleDistance.arcoreDistanceM,
+                arcoreDistanceSource = topScaleDistance.arcoreDistanceSource.name,
+                visualDistanceM = topScaleDistance.visualDistanceM,
+                visualReferenceWidthPx = topScaleDistance.visualReferenceWidthPx,
+                visualReferenceWidthMm = topScaleDistance.visualReferenceWidthMm,
+                visualReferenceStatus = topScaleDistance.visualReferenceStatus,
+                distanceSourceForScale = topScaleDistance.distanceSourceForScale.name,
+                distanceConfidence = topScaleDistance.distanceConfidence.name,
             ),
             coarseHints = null, // on-device stud counting deferred (plan scope)
         )
