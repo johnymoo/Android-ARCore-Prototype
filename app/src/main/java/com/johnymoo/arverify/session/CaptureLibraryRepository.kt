@@ -1,5 +1,6 @@
 package com.johnymoo.arverify.session
 
+import com.johnymoo.arverify.net.RecognitionResult
 import java.io.File
 
 data class SessionEntry(val dir: File, val session: CaptureSession)
@@ -25,6 +26,26 @@ class CaptureLibraryRepository(private val rootDir: File) {
             tmp.copyTo(dest, overwrite = true)
             tmp.delete()
         }
+    }
+
+    fun updateUploadResult(dir: File, result: RecognitionResult): CaptureSession? {
+        val mf = File(dir, MANIFEST)
+        val current = if (mf.isFile) SessionManifestCodec.fromJson(mf.readText()) else null
+        val updated = current?.copy(
+            status = SessionStatusMapper.fromRecognition(result.status),
+            recognized = result.recognized?.let {
+                RecognizedSummary(
+                    system = it.system,
+                    kind = it.kind,
+                    unitsX = it.unitsX,
+                    unitsY = it.unitsY,
+                    pitchMm = it.pitchMm,
+                    confidence = it.confidence,
+                )
+            } ?: current.recognized,
+        ) ?: return null
+        writeManifest(dir, updated)
+        return updated
     }
 
     fun delete(entry: SessionEntry): Boolean = entry.dir.deleteRecursively()

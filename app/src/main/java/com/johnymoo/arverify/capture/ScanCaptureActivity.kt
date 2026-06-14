@@ -48,7 +48,11 @@ class ScanCaptureActivity : ComponentActivity() {
             depthRange = DepthOverlayRange.fromDistanceBand(config.minDistanceM, config.maxDistanceM),
         )
         renderer = CaptureRenderer({ session }, config, mode, holder, writer, windowManager,
-            try { packageManager.getPackageInfo("com.google.ar.core", 0).versionName ?: "" } catch (e: Exception) { "" })
+            try { packageManager.getPackageInfo("com.google.ar.core", 0).versionName ?: "" } catch (e: Exception) { "" },
+            diagnosticsRoot = SessionPaths.diagnosticsRoot(this),
+            onDiagnosticSaved = { dir -> runOnUiThread { toast("诊断已保存：${dir.name}") } },
+            onDiagnosticError = { error -> runOnUiThread { toast("诊断保存失败：${error.message ?: error.javaClass.simpleName}") } },
+        )
 
         setContent {
             ScanForgeTheme {
@@ -57,6 +61,10 @@ class ScanCaptureActivity : ComponentActivity() {
                     holder = holder,
                     glViewFactory = { ctx -> makeGlView(ctx) },
                     onShutter = { renderer.captureRequested = true },
+                    onDiagnostics = {
+                        renderer.diagnosticRequested = true
+                        toast("正在保存诊断…")
+                    },
                     onFinish = {
                         if (mode == CaptureMode.RECOGNITION) showKind = true
                         else exportGeneral()
@@ -108,11 +116,15 @@ class ScanCaptureActivity : ComponentActivity() {
         when (outcome) {
             is com.johnymoo.arverify.net.UploadOutcome.Failure ->
                 toast("上传失败：${outcome.message}（已本地留存，可在采集库重试）")
-            is com.johnymoo.arverify.net.UploadOutcome.Success -> when (outcome.result.status) {
-                com.johnymoo.arverify.net.RecognitionStatus.NEEDS_MEASUREMENT ->
-                    startActivity(android.content.Intent(this, com.johnymoo.arverify.measure.MeasurementWizardActivity::class.java))
-                else ->
-                    startActivity(android.content.Intent(this, com.johnymoo.arverify.result.ResultActivity::class.java))
+            is com.johnymoo.arverify.net.UploadOutcome.Success -> {
+                com.johnymoo.arverify.session.CaptureLibraryRepository(com.johnymoo.arverify.ui.common.SessionPaths.captureRoot(this))
+                    .updateUploadResult(java.io.File(holder.state.value.sessionDir), outcome.result)
+                when (outcome.result.status) {
+                    com.johnymoo.arverify.net.RecognitionStatus.NEEDS_MEASUREMENT ->
+                        startActivity(android.content.Intent(this, com.johnymoo.arverify.measure.MeasurementWizardActivity::class.java))
+                    else ->
+                        startActivity(android.content.Intent(this, com.johnymoo.arverify.result.ResultActivity::class.java))
+                }
             }
         }
     }
@@ -141,6 +153,7 @@ class ScanCaptureActivity : ComponentActivity() {
                     val c = s.config
                     c.depthMode = if (s.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) Config.DepthMode.AUTOMATIC else Config.DepthMode.DISABLED
                     c.focusMode = Config.FocusMode.AUTO
+                    c.planeFindingMode = Config.PlaneFindingMode.HORIZONTAL_AND_VERTICAL
                     s.configure(c)
                 }
             } catch (e: Exception) { Toast.makeText(this, "无法启动 AR：${e.javaClass.simpleName}", Toast.LENGTH_LONG).show(); finish(); return }

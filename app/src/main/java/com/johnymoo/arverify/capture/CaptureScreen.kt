@@ -43,6 +43,7 @@ fun CaptureScreen(
     holder: CaptureHolder,
     glViewFactory: (android.content.Context) -> GLSurfaceView,
     onShutter: () -> Unit,
+    onDiagnostics: () -> Unit,
     onFinish: () -> Unit,
     onBack: () -> Unit,
     finishLabel: String,
@@ -73,11 +74,21 @@ fun CaptureScreen(
         }
 
         // Depth toggle chip (top-right, below chrome)
-        Surface(color = androidx.compose.ui.graphics.Color(0x88000000), shape = MaterialTheme.shapes.large,
-            modifier = Modifier.align(Alignment.TopEnd).statusBarsPadding().padding(top = 56.dp, end = 12.dp)
-                .clickableNoRipple { holder.toggleDepth() }) {
-            Text(if (state.depthOn) "深度 ● 开" else "深度 ○ 关", color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp))
+        Column(
+            modifier = Modifier.align(Alignment.TopEnd).statusBarsPadding().padding(top = 56.dp, end = 12.dp),
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Surface(color = androidx.compose.ui.graphics.Color(0x88000000), shape = MaterialTheme.shapes.large,
+                modifier = Modifier.clickableNoRipple { holder.toggleDepth() }) {
+                Text(if (state.depthOn) "深度 ● 开" else "深度 ○ 关", color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp))
+            }
+            Surface(color = androidx.compose.ui.graphics.Color(0x88000000), shape = MaterialTheme.shapes.large,
+                modifier = Modifier.clickableNoRipple(onDiagnostics)) {
+                Text("诊断", color = Color.White.copy(alpha = 0.9f),
+                    style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+            }
         }
 
         // Quality + prompt (center-bottom)

@@ -6,4 +6,7 @@ import java.io.File
 object SessionPaths {
     fun captureRoot(context: Context): File =
         File(context.getExternalFilesDir(null), "captures").apply { mkdirs() }
+
+    fun diagnosticsRoot(context: Context): File =
+        File(context.getExternalFilesDir(null), "diagnostics").apply { mkdirs() }
 }

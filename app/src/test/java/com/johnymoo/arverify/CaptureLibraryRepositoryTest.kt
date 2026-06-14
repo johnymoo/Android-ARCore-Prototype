@@ -1,6 +1,9 @@
 package com.johnymoo.arverify
 
 import com.johnymoo.arverify.capture.CaptureSlot
+import com.johnymoo.arverify.net.RecognitionResult
+import com.johnymoo.arverify.net.RecognitionStatus
+import com.johnymoo.arverify.net.Recognized
 import com.johnymoo.arverify.session.CaptureLibraryRepository
 import com.johnymoo.arverify.session.CaptureMode
 import com.johnymoo.arverify.session.CaptureSession
@@ -70,6 +73,36 @@ class CaptureLibraryRepositoryTest {
         assertTrue(repo.delete(entry))
         assertFalse(dir.exists())
         assertTrue(repo.listSessions().isEmpty())
+    }
+
+    @Test fun uploadResultUpdatesManifestStatusAndRecognizedSummary() {
+        val root = tmp.newFolder("captures")
+        val repo = CaptureLibraryRepository(root)
+        val dir = File(root, "part-needs-measurement")
+        repo.writeManifest(dir, session("part-needs-measurement", 1_000L, SessionStatus.PENDING_UPLOAD))
+
+        val updated = repo.updateUploadResult(
+            dir,
+            RecognitionResult(
+                captureId = "cap-1",
+                jobId = null,
+                status = RecognitionStatus.NEEDS_MEASUREMENT,
+                recognized = Recognized(
+                    system = null,
+                    kind = "brick",
+                    unitsX = 22,
+                    unitsY = 14,
+                    pitchMm = 163.668,
+                    confidence = 0.0,
+                ),
+                needsMeasurement = null,
+            ),
+        )
+
+        assertEquals(SessionStatus.NEEDS_MEASUREMENT, updated!!.status)
+        assertEquals("brick", updated.recognized!!.kind)
+        assertEquals(22, updated.recognized!!.unitsX)
+        assertEquals(SessionStatus.NEEDS_MEASUREMENT, repo.listSessions().single().session.status)
     }
 
     @Test fun missingRootListsEmpty() {

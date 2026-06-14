@@ -129,6 +129,7 @@ fun SessionDetailScreen(nav: NavController, dirPath: String) {
                             com.johnymoo.arverify.net.UploadResultHolder.baseUrl = baseUrl
                             (context as? android.app.Activity)?.runOnUiThread {
                                 if (outcome is com.johnymoo.arverify.net.UploadOutcome.Success) {
+                                    repo.updateUploadResult(dir, outcome.result)
                                     when (outcome.result.status) {
                                         com.johnymoo.arverify.net.RecognitionStatus.NEEDS_MEASUREMENT ->
                                             context.startActivity(android.content.Intent(context, com.johnymoo.arverify.measure.MeasurementWizardActivity::class.java))
