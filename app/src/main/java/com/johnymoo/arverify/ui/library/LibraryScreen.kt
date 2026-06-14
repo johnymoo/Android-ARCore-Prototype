@@ -84,7 +84,7 @@ fun SessionRow(entry: SessionEntry, onClick: () -> Unit) {
     ) {
         Column(Modifier.weight(1f)) {
             Text("${s.partId} · ${s.frames.size} 帧", style = MaterialTheme.typography.bodyMedium)
-            Text(s.deviceModel, style = MaterialTheme.typography.labelSmall,
+            Text("${SessionDisplay.captureTime(s.createdAtEpochMs)} · ${s.deviceModel}", style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         StatusBadge(s.status)

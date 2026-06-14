@@ -1,5 +1,6 @@
 package com.johnymoo.arverify.net
 
+import android.util.Log
 import java.util.UUID
 
 /** One captured file (already encoded to bytes by the on-device layer). */
@@ -41,9 +42,10 @@ class CaptureUploader(
         mb.addFormField("ar_metadata", pkg.arMetadataJson)
         mb.addFilePart("recognition_rgb", pkg.recognitionRgb.filename, pkg.recognitionRgb.contentType, pkg.recognitionRgb.bytes)
         mb.addFilePart("recognition_depth", pkg.recognitionDepth.filename, pkg.recognitionDepth.contentType, pkg.recognitionDepth.bytes)
-        pkg.images.forEach { mb.addFilePart("images[]", it.filename, it.contentType, it.bytes) }
+        pkg.images.forEach { mb.addFilePart("images", it.filename, it.contentType, it.bytes) }
         val body = mb.build()
         val contentType = mb.contentType()
+        Log.i(TAG, "POST $url images=${pkg.images.size} bodyBytes=${body.size}")
 
         var lastMsg = "upload failed"
         var lastCode: Int? = null
@@ -51,18 +53,32 @@ class CaptureUploader(
             try {
                 val resp = transport.post(url, contentType, body)
                 when {
-                    resp.code in 200..299 ->
-                        return UploadOutcome.Success(RecognitionResultModel.parse(resp.body), resp.body)
+                    resp.code in 200..299 -> {
+                        val parsed = RecognitionResultModel.parse(resp.body)
+                        Log.i(TAG, "HTTP ${resp.code} status=${parsed.status}")
+                        return UploadOutcome.Success(parsed, resp.body)
+                    }
                     resp.code in 400..499 ->
-                        return UploadOutcome.Failure("HTTP ${resp.code}", resp.code)
-                    else -> { lastMsg = "HTTP ${resp.code}"; lastCode = resp.code }
+                        return UploadOutcome.Failure("HTTP ${resp.code}: ${shortBody(resp.body)}", resp.code)
+                    else -> {
+                        lastMsg = "HTTP ${resp.code}"
+                        lastCode = resp.code
+                        Log.w(TAG, "$lastMsg while uploading")
+                    }
                 }
             } catch (e: Exception) {
                 lastMsg = e.javaClass.simpleName
+                Log.w(TAG, "Upload attempt failed: $lastMsg", e)
             }
         }
         return UploadOutcome.Failure(lastMsg, lastCode)
     }
 
-    companion object { const val ENDPOINT = "/api/v1/ar-captures" }
+    companion object {
+        private const val TAG = "CaptureUploader"
+        const val ENDPOINT = "/api/v1/ar-captures"
+
+        private fun shortBody(body: String): String =
+            body.replace(Regex("\\s+"), " ").trim().take(180).ifBlank { "no response body" }
+    }
 }

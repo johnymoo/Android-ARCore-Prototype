@@ -65,4 +65,18 @@ class RecognitionResultModelTest {
         assertTrue(r.needsMeasurement?.fields?.isEmpty() == true)
         assertEquals("g", r.needsMeasurement?.guidance)
     }
+
+    @Test fun parsesBackendStringMeasurementFields() {
+        val r = RecognitionResultModel.parse(
+            """
+            {"status":"needs_measurement",
+             "needs_measurement":{"guidance":"g","fields":["outer_pitch_mm","inner_pitch_mm"]}}
+            """.trimIndent()
+        )
+
+        assertEquals(RecognitionStatus.NEEDS_MEASUREMENT, r.status)
+        assertEquals(2, r.needsMeasurement?.fields?.size)
+        assertEquals("outer_pitch_mm", r.needsMeasurement?.fields?.get(0)?.key)
+        assertEquals("inner_pitch_mm", r.needsMeasurement?.fields?.get(1)?.label)
+    }
 }

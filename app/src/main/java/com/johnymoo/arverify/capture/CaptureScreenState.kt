@@ -11,6 +11,8 @@ data class CaptureUiState(
     val depthOn: Boolean = true,
     val qualityReason: QualityReason = QualityReason.NOT_TRACKING,
     val distanceM: Double = 0.0,
+    val targetLocked: Boolean = false,
+    val targetCoverage: Double = 0.0,
     val sharpness: Double = 0.0,
     val frames: List<CapturedFrame> = emptyList(),
     val wizardStep: WizardStep = WizardStep.NEED_TOP,

@@ -34,6 +34,7 @@ import com.johnymoo.arverify.metadata.DepthDims
 import com.johnymoo.arverify.metadata.DeviceMeta
 import com.johnymoo.arverify.metadata.RecognitionFrameMeta
 import com.johnymoo.arverify.net.CapturePackage
+import com.johnymoo.arverify.net.CaptureUploadAssembler
 import com.johnymoo.arverify.net.CaptureUploader
 import com.johnymoo.arverify.net.FilePart
 import com.johnymoo.arverify.net.HttpUrlConnectionTransport
@@ -199,7 +200,7 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         try {
             frame.acquireDepthImage16Bits().use { depth ->
                 val g = ArFrameExtractor.depthGridMm(depth)
-                distance = ScaleMath.medianCenterDistanceMeters(g.values, g.width, g.height, 0.2)
+                distance = DepthTargetDetector.detect(g.values, g.width, g.height).distanceM
             }
         } catch (e: NotYetAvailableException) { /* depth warming up */ }
         try {
@@ -352,6 +353,11 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
         try {
             LocalRetention(File(getExternalFilesDir(null), "captures")).save(pkg, stamp)
         } catch (e: Exception) { /* best-effort */ }
+        val missingImages = CaptureUploadAssembler.missingImageCount(pkg)
+        if (missingImages > 0) {
+            toast("还需补拍 ${missingImages} 张角度图后再上传")
+            return
+        }
 
         binding.progress.visibility = View.VISIBLE
         binding.btnUpload.isEnabled = false

@@ -83,6 +83,11 @@ fun SessionDetailScreen(nav: NavController, dirPath: String) {
                         .fromDir(dir, session.partId, session.recognized?.kind ?: "brick", null)
                     if (pkg == null) { android.widget.Toast.makeText(context, "缺少识别帧", android.widget.Toast.LENGTH_SHORT).show() }
                     else {
+                        val missingImages = com.johnymoo.arverify.net.CaptureUploadAssembler.missingImageCount(pkg)
+                        if (missingImages > 0) {
+                            android.widget.Toast.makeText(context, "还需补拍 ${missingImages} 张角度图后再上传", android.widget.Toast.LENGTH_LONG).show()
+                            return@Button
+                        }
                         val baseUrl = com.johnymoo.arverify.config.AppPrefs(context).load().baseUrl
                         android.widget.Toast.makeText(context, "正在重新上传…", android.widget.Toast.LENGTH_SHORT).show()
                         Thread {
@@ -93,9 +98,15 @@ fun SessionDetailScreen(nav: NavController, dirPath: String) {
                             com.johnymoo.arverify.net.UploadResultHolder.baseUrl = baseUrl
                             (context as? android.app.Activity)?.runOnUiThread {
                                 if (outcome is com.johnymoo.arverify.net.UploadOutcome.Success) {
-                                    context.startActivity(android.content.Intent(context, com.johnymoo.arverify.result.ResultActivity::class.java))
+                                    when (outcome.result.status) {
+                                        com.johnymoo.arverify.net.RecognitionStatus.NEEDS_MEASUREMENT ->
+                                            context.startActivity(android.content.Intent(context, com.johnymoo.arverify.measure.MeasurementFormActivity::class.java))
+                                        else ->
+                                            context.startActivity(android.content.Intent(context, com.johnymoo.arverify.result.ResultActivity::class.java))
+                                    }
                                 } else {
-                                    android.widget.Toast.makeText(context, "上传失败，可重试", android.widget.Toast.LENGTH_SHORT).show()
+                                    val msg = (outcome as? com.johnymoo.arverify.net.UploadOutcome.Failure)?.message ?: "未知错误"
+                                    android.widget.Toast.makeText(context, "上传失败：$msg", android.widget.Toast.LENGTH_LONG).show()
                                 }
                             }
                         }.start()

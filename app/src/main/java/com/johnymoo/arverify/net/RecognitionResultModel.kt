@@ -54,12 +54,21 @@ object RecognitionResultModel {
             },
             needsMeasurement = obj(root, "needs_measurement")?.let { nm ->
                 val fields = arr(nm, "fields").map { el ->
-                    val fo = el.takeIf { it.isJsonObject }?.asJsonObject
-                    MeasurementField(
-                        key = fo?.let { str(it, "key") },
-                        label = fo?.let { str(it, "label") },
-                        unit = fo?.let { str(it, "unit") },
-                    )
+                    when {
+                        el.isJsonObject -> {
+                            val fo = el.asJsonObject
+                            MeasurementField(
+                                key = str(fo, "key"),
+                                label = str(fo, "label"),
+                                unit = str(fo, "unit"),
+                            )
+                        }
+                        el.isJsonPrimitive -> {
+                            val key = el.asString
+                            MeasurementField(key = key, label = key, unit = "mm")
+                        }
+                        else -> MeasurementField(key = null, label = null, unit = null)
+                    }
                 }
                 NeedsMeasurement(fields = fields, guidance = str(nm, "guidance"))
             },

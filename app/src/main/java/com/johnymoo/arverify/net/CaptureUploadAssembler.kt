@@ -3,6 +3,8 @@ package com.johnymoo.arverify.net
 import java.io.File
 
 object CaptureUploadAssembler {
+    const val MIN_IMAGES = 4
+
     fun fromDir(dir: File, partId: String, kind: String, systemHint: String?): CapturePackage? {
         val metaFile = File(dir, "ar_metadata.json")
         val rgbFile = File(dir, "recognition_rgb.jpg")
@@ -23,4 +25,7 @@ object CaptureUploadAssembler {
             images = images,
         )
     }
+
+    fun missingImageCount(pkg: CapturePackage): Int =
+        (MIN_IMAGES - pkg.images.size).coerceAtLeast(0)
 }

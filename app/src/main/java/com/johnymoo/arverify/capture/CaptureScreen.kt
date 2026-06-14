@@ -2,15 +2,21 @@ package com.johnymoo.arverify.capture
 
 import android.opengl.GLSurfaceView
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
@@ -22,11 +28,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.johnymoo.arverify.session.CapturedFrame
+import com.johnymoo.arverify.ui.theme.SfWait
 
 @Composable
 fun CaptureScreen(
@@ -67,8 +75,27 @@ fun CaptureScreen(
         }
 
         // Quality + prompt (center-bottom)
-        Text(qualityText(state), color = androidx.compose.ui.graphics.Color.White,
-            modifier = Modifier.align(Alignment.Center).padding(top = 120.dp))
+        TargetReticle(
+            qualityReason = state.qualityReason,
+            targetLocked = state.targetLocked,
+            modifier = Modifier.align(Alignment.Center),
+        )
+        Column(
+            modifier = Modifier.align(Alignment.Center).padding(top = 234.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                CaptureGuidanceText.primaryPrompt(state),
+                color = guidanceColor(state.qualityReason),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                CaptureGuidanceText.statusLine(state),
+                color = Color.White.copy(alpha = 0.86f),
+                style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
 
         // Bottom chrome: thumbnails + shutter + finish
         Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
@@ -81,6 +108,24 @@ fun CaptureScreen(
             Button(onClick = onFinish, enabled = state.canFinish) { Text("$finishLabel ${state.frames.size}") }
         }
     }
+}
+
+@Composable private fun TargetReticle(
+    qualityReason: QualityReason,
+    targetLocked: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val color = when {
+        qualityReason == QualityReason.OK -> MaterialTheme.colorScheme.primary
+        targetLocked -> SfWait
+        else -> Color.White.copy(alpha = 0.82f)
+    }
+    Surface(
+        color = Color.Transparent,
+        shape = RoundedCornerShape(8.dp),
+        border = BorderStroke(2.dp, color),
+        modifier = modifier.width(210.dp).height(210.dp),
+    ) {}
 }
 
 @Composable private fun ThumbnailDot(f: CapturedFrame) {
@@ -99,13 +144,11 @@ private fun stepText(s: CaptureUiState): String =
         WizardStep.READY -> "向导 · 已就绪"
     } else "自由 · 已采 ${s.frames.size}"
 
-private fun qualityText(s: CaptureUiState): String {
-    val d = if (s.distanceM > 0) "%.2fm".format(s.distanceM) else "--"
-    val base = "深度 $d · 清晰度 %.0f".format(s.sharpness)
-    return if (s.qualityReason == QualityReason.OK) base else "${s.qualityReason.messageZh}\n$base"
-}
+@Composable
+private fun guidanceColor(reason: QualityReason): Color =
+    if (reason == QualityReason.OK) MaterialTheme.colorScheme.primary else SfWait
 
 private fun Modifier.clickableNoRipple(onClick: () -> Unit): Modifier =
-    this.then(androidx.compose.foundation.clickable(
+    this.then(clickable(
         interactionSource = androidx.compose.foundation.interaction.MutableInteractionSource(),
         indication = null, onClick = onClick))

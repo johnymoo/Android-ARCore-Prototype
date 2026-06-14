@@ -8,8 +8,10 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
@@ -85,6 +87,11 @@ class ScanCaptureActivity : ComponentActivity() {
         val partId = dir.name.substringBeforeLast('_')
         val pkg = com.johnymoo.arverify.net.CaptureUploadAssembler.fromDir(dir, partId, kind, null)
             ?: run { toast("缺少识别帧，请先拍俯视凸点面"); return }
+        val missingImages = com.johnymoo.arverify.net.CaptureUploadAssembler.missingImageCount(pkg)
+        if (missingImages > 0) {
+            toast("还需补拍 ${missingImages} 张角度图后再上传")
+            return
+        }
         val config = com.johnymoo.arverify.config.AppPrefs(this).load()
         toast("正在上传与识别…")
         io.execute {

@@ -63,10 +63,15 @@ class CaptureRenderer(
 
     private fun evaluate(frame: Frame) {
         var distance = 0.0; var sharp = 0.0
+        var targetLocked = false
+        var targetCoverage = 0.0
         try {
             frame.acquireDepthImage16Bits().use { d ->
                 val g = ArFrameExtractor.depthGridMm(d)
-                distance = ScaleMath.medianCenterDistanceMeters(g.values, g.width, g.height, 0.2)
+                val target = DepthTargetDetector.detect(g.values, g.width, g.height)
+                distance = target.distanceM
+                targetLocked = target.locked
+                targetCoverage = target.coverage
                 if ((frameTick++ % 2) == 0) {
                     holder.depthBitmap.value = DepthHeatmap.toBitmap(g.values, g.width, g.height, depthRange)
                 }
@@ -84,10 +89,11 @@ class CaptureRenderer(
             TrackingState.PAUSED -> TrackingStateLite.PAUSED
             TrackingState.STOPPED -> TrackingStateLite.STOPPED
         }
-        val reason = gate.evaluate(tracking, distance, sharp, null)
+        val reason = gate.evaluate(tracking, distance, sharp, null, targetLocked)
         val st = controller.state
         holder.state.value = holder.state.value.copy(
-            qualityReason = reason, distanceM = distance, sharpness = sharp,
+            qualityReason = reason, distanceM = distance, targetLocked = targetLocked,
+            targetCoverage = targetCoverage, sharpness = sharp,
             wizardStep = st.step, canFinish = st.canUpload,
         )
     }
@@ -101,7 +107,7 @@ class CaptureRenderer(
                 frame.acquireDepthImage16Bits().use { d ->
                     val g = ArFrameExtractor.depthGridMm(d)
                     gridVals = g.values; gw = g.width; gh = g.height
-                    dist = ScaleMath.medianCenterDistanceMeters(g.values, g.width, g.height, 0.2)
+                    dist = DepthTargetDetector.detect(g.values, g.width, g.height).distanceM
                 }
             } catch (e: NotYetAvailableException) { /* RGB-only frame */ }
 

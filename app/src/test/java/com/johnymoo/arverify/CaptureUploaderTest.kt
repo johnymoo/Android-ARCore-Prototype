@@ -53,7 +53,7 @@ class CaptureUploaderTest {
         assertTrue(body.contains("name=\"ar_metadata\""))
         assertTrue(body.contains("name=\"recognition_rgb\"; filename=\"rgb.jpg\""))
         assertTrue(body.contains("name=\"recognition_depth\"; filename=\"depth.png\""))
-        assertTrue(body.contains("name=\"images[]\"; filename=\"a.jpg\""))
+        assertTrue(body.contains("name=\"images\"; filename=\"a.jpg\""))
     }
 
     @Test fun retriesServerErrorsThenSucceeds() {
@@ -73,7 +73,9 @@ class CaptureUploaderTest {
         val outcome = CaptureUploader(t, maxAttempts = 3, boundaryProvider = { "BND" })
             .upload("http://h/", pkg())
         assertTrue(outcome is UploadOutcome.Failure)
-        assertEquals(400, (outcome as UploadOutcome.Failure).lastCode)
+        outcome as UploadOutcome.Failure
+        assertEquals(400, outcome.lastCode)
+        assertTrue(outcome.message.contains("bad"))
         assertEquals(1, t.calls)
     }
 

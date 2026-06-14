@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- AR Optional: the app installs and runs on AR-incapable devices so it can REPORT status. -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />

@@ -34,6 +34,15 @@ class CaptureUploadAssemblerTest {
         assertEquals(listOf("frame_0.jpg", "frame_1.jpg"), pkg.images.map { it.filename })
     }
 
+    @Test fun reportsMissingImagesBeforeUpload() {
+        val dir = tmp.newFolder("part-y_123")
+        seed(dir)
+        val pkg = CaptureUploadAssembler.fromDir(dir, partId = "part-y", kind = "brick", systemHint = null)!!
+
+        assertEquals(4, CaptureUploadAssembler.MIN_IMAGES)
+        assertEquals(2, CaptureUploadAssembler.missingImageCount(pkg))
+    }
+
     @Test fun missingContractFilesReturnsNull() {
         val dir = tmp.newFolder("empty_1")
         assertNull(CaptureUploadAssembler.fromDir(dir, "p", "brick", null))
