@@ -1,5 +1,7 @@
 package com.johnymoo.arverify.capture
 
+import java.util.Locale
+
 object CaptureGuidanceText {
     fun primaryPrompt(state: CaptureUiState): String = when (state.qualityReason) {
         QualityReason.OK -> "可以拍摄"
@@ -13,8 +15,28 @@ object CaptureGuidanceText {
     }
 
     fun statusLine(state: CaptureUiState): String {
-        val distance = if (state.distanceM > 0) "%.2fm".format(state.distanceM) else "--"
+        val gateDistance = when {
+            state.distanceM > 0 -> String.format(Locale.US, "%.2fm", state.distanceM)
+            else -> "--"
+        }
+        val scaleDistance = when {
+            state.scaleDistanceM > 0 -> String.format(Locale.US, "%.2fm", state.scaleDistanceM)
+            else -> "--"
+        }
+        val gateLabel = when (state.distanceSource) {
+            TargetDistanceSource.HIT_TEST -> "平面"
+            TargetDistanceSource.DEPTH -> "深度"
+            TargetDistanceSource.NONE -> "无"
+        }
+        val confidence = when (state.distanceConfidence) {
+            DistanceConfidence.HIGH -> "高可信"
+            DistanceConfidence.LOW -> "低可信"
+        }
         val target = if (state.targetLocked) "目标锁定" else "未锁定"
-        return "$target · 深度 $distance · 清晰度 %.0f".format(state.sharpness)
+        return String.format(
+            Locale.US,
+            "$target · 尺度 $scaleDistance · 门控 $gateLabel $gateDistance · $confidence · 清晰度 %.0f",
+            state.sharpness,
+        )
     }
 }
