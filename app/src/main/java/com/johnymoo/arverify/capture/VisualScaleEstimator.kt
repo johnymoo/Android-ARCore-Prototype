@@ -12,6 +12,13 @@ enum class DistanceConfidence {
     LOW,
 }
 
+data class ScaleEstimationPolicy(
+    val referenceModeEnabled: Boolean = false,
+    val visualMinDistanceM: Double = 0.12,
+    val visualMaxDistanceM: Double = 0.80,
+    val maxDepthDisagreementM: Double = 0.20,
+)
+
 data class ScaleDistanceEstimate(
     val distanceM: Double,
     val arcoreDistanceM: Double,
@@ -22,6 +29,8 @@ data class ScaleDistanceEstimate(
     val visualReferenceStatus: String,
     val distanceSourceForScale: DistanceSourceForScale,
     val distanceConfidence: DistanceConfidence,
+    val referenceModeEnabled: Boolean = false,
+    val manualMeasurementRecommended: Boolean = true,
 )
 
 object VisualScaleEstimator {
@@ -32,9 +41,18 @@ object VisualScaleEstimator {
         intrinsics: CameraIntrinsics,
         arcoreDistanceM: Double,
         arcoreDistanceSource: TargetDistanceSource,
+        policy: ScaleEstimationPolicy = ScaleEstimationPolicy(),
     ): ScaleDistanceEstimate {
+        if (!policy.referenceModeEnabled) {
+            return fallback(
+                arcoreDistanceM,
+                arcoreDistanceSource,
+                "REFERENCE_MODE_DISABLED",
+                policy.referenceModeEnabled,
+            )
+        }
         if (image == null) {
-            return fallback(arcoreDistanceM, arcoreDistanceSource, "RGB_UNAVAILABLE")
+            return fallback(arcoreDistanceM, arcoreDistanceSource, "RGB_UNAVAILABLE", policy.referenceModeEnabled)
         }
 
         return when (val detected = RedBrickReferenceDetector.detect(image)) {
@@ -44,7 +62,27 @@ object VisualScaleEstimator {
                     focalLengthPx = intrinsics.fx,
                     detectedWidthPx = detected.referenceWidthPx,
                 )
-                if (visualDistance > 0.0) {
+                if (visualDistance <= 0.0) {
+                    fallback(arcoreDistanceM, arcoreDistanceSource, "INVALID_INTRINSICS", policy.referenceModeEnabled)
+                } else if (visualDistance < policy.visualMinDistanceM || visualDistance > policy.visualMaxDistanceM) {
+                    fallback(
+                        arcoreDistanceM,
+                        arcoreDistanceSource,
+                        "VISUAL_DISTANCE_OUT_OF_RANGE",
+                        policy.referenceModeEnabled,
+                    )
+                } else if (
+                    arcoreDistanceM > 0.0 &&
+                    arcoreDistanceSource != TargetDistanceSource.NONE &&
+                    kotlin.math.abs(arcoreDistanceM - visualDistance) > policy.maxDepthDisagreementM
+                ) {
+                    fallback(
+                        arcoreDistanceM,
+                        arcoreDistanceSource,
+                        "VISUAL_DEPTH_DISAGREE",
+                        policy.referenceModeEnabled,
+                    )
+                } else {
                     ScaleDistanceEstimate(
                         distanceM = visualDistance,
                         arcoreDistanceM = arcoreDistanceM,
@@ -55,13 +93,13 @@ object VisualScaleEstimator {
                         visualReferenceStatus = "DETECTED",
                         distanceSourceForScale = DistanceSourceForScale.VISUAL_REFERENCE,
                         distanceConfidence = DistanceConfidence.HIGH,
+                        referenceModeEnabled = policy.referenceModeEnabled,
+                        manualMeasurementRecommended = false,
                     )
-                } else {
-                    fallback(arcoreDistanceM, arcoreDistanceSource, "INVALID_INTRINSICS")
                 }
             }
             is VisualReferenceDetection.Failed ->
-                fallback(arcoreDistanceM, arcoreDistanceSource, detected.reason)
+                fallback(arcoreDistanceM, arcoreDistanceSource, detected.reason, policy.referenceModeEnabled)
         }
     }
 
@@ -69,6 +107,7 @@ object VisualScaleEstimator {
         arcoreDistanceM: Double,
         arcoreDistanceSource: TargetDistanceSource,
         visualReferenceStatus: String,
+        referenceModeEnabled: Boolean = false,
     ): ScaleDistanceEstimate =
         ScaleDistanceEstimate(
             distanceM = arcoreDistanceM.takeIf { it > 0.0 } ?: 0.0,
@@ -80,5 +119,7 @@ object VisualScaleEstimator {
             visualReferenceStatus = visualReferenceStatus,
             distanceSourceForScale = DistanceSourceForScale.ARCORE_DISTANCE,
             distanceConfidence = DistanceConfidence.LOW,
+            referenceModeEnabled = referenceModeEnabled,
+            manualMeasurementRecommended = true,
         )
 }

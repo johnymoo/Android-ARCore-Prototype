@@ -20,6 +20,8 @@ data class CaptureUiState(
     val visualReferenceStatus: String = "NOT_EVALUATED",
     val distanceSourceForScale: DistanceSourceForScale = DistanceSourceForScale.ARCORE_DISTANCE,
     val distanceConfidence: DistanceConfidence = DistanceConfidence.LOW,
+    val referenceModeEnabled: Boolean = false,
+    val manualMeasurementRecommended: Boolean = true,
     val targetLocked: Boolean = false,
     val targetCoverage: Double = 0.0,
     val sharpness: Double = 0.0,

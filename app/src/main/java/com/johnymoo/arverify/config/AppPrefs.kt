@@ -14,6 +14,7 @@ class AppPrefs(context: Context) {
             maxDistanceM = sp.getFloat(KEY_MAX_DIST, d.maxDistanceM.toFloat()).toDouble(),
             minSharpness = sp.getFloat(KEY_SHARP, d.minSharpness.toFloat()).toDouble(),
             saveDebugRgbToGallery = sp.getBoolean(KEY_DEBUG_GALLERY, d.saveDebugRgbToGallery),
+            visualReferenceModeEnabled = sp.getBoolean(KEY_VISUAL_REFERENCE_MODE, d.visualReferenceModeEnabled),
         )
     }
 
@@ -22,11 +23,15 @@ class AppPrefs(context: Context) {
     fun setSaveDebugRgbToGallery(enabled: Boolean) =
         sp.edit().putBoolean(KEY_DEBUG_GALLERY, enabled).apply()
 
+    fun setVisualReferenceModeEnabled(enabled: Boolean) =
+        sp.edit().putBoolean(KEY_VISUAL_REFERENCE_MODE, enabled).apply()
+
     companion object {
         private const val KEY_BASE_URL = "base_url"
         private const val KEY_MIN_DIST = "min_dist"
         private const val KEY_MAX_DIST = "max_dist"
         private const val KEY_SHARP = "min_sharp"
         private const val KEY_DEBUG_GALLERY = "debug_gallery"
+        private const val KEY_VISUAL_REFERENCE_MODE = "visual_reference_mode"
     }
 }

@@ -38,6 +38,12 @@ class CaptureRenderer(
     private val controller = CaptureWizardController()
     private val gate = FrameQualityGate(config.thresholds())
     private val depthRange = DepthOverlayRange.fromDistanceBand(config.minDistanceM, config.maxDistanceM)
+    private val scalePolicy = ScaleEstimationPolicy(
+        referenceModeEnabled = config.visualReferenceModeEnabled,
+        visualMinDistanceM = config.visualReferenceMinDistanceM,
+        visualMaxDistanceM = config.visualReferenceMaxDistanceM,
+        maxDepthDisagreementM = config.visualReferenceMaxDepthDisagreementM,
+    )
     private val diagnosticsWriter = diagnosticsRoot?.let { DiagnosticSnapshotWriter(it) }
 
     @Volatile var captureRequested = false
@@ -157,6 +163,7 @@ class CaptureRenderer(
                     intrinsics = intr,
                     arcoreDistanceM = dist ?: 0.0,
                     arcoreDistanceSource = resolvedTarget.source,
+                    policy = scalePolicy,
                 )
                 writer.writeRecognition(intr, pose, scaleDistance, gridVals!!, gw, gh, rgb, arcoreVersion)
                 holder.state.value = holder.state.value.copy(
@@ -168,6 +175,8 @@ class CaptureRenderer(
                     visualReferenceStatus = scaleDistance.visualReferenceStatus,
                     distanceSourceForScale = scaleDistance.distanceSourceForScale,
                     distanceConfidence = scaleDistance.distanceConfidence,
+                    referenceModeEnabled = scaleDistance.referenceModeEnabled,
+                    manualMeasurementRecommended = scaleDistance.manualMeasurementRecommended,
                 )
             }
 
@@ -247,6 +256,7 @@ class CaptureRenderer(
                 intrinsics = ArFrameExtractor.intrinsics(frame),
                 arcoreDistanceM = state.distanceM,
                 arcoreDistanceSource = state.distanceSource,
+                policy = scalePolicy,
             )
             val tracking = frame.camera.trackingState.name
             val depthSummary = depthValues?.let {
