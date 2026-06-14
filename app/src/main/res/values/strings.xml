@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">拾模</string>
+    <string name="brand_en">ScanForge</string>
+    <string name="title">原型验证工具</string>
+    <string name="btn_check_arcore">检查 ARCore</string>
+    <string name="btn_check_depth">检查 Depth API</string>
+    <string name="btn_capture">开始采集</string>
+    <string name="btn_export">导出结果</string>
+    <string name="section_result">当前检测结果</string>
+    <string name="supported">支持</string>
+    <string name="not_supported">不支持</string>
+    <!-- %1$s is replaced with 支持 / 不支持 or the route label -->
+    <string name="status_arcore">ARCore：%1$s</string>
+    <string name="status_depth">Depth：%1$s</string>
+    <string name="status_route">推荐路线：%1$s</string>
+    <string name="capture_tips">光线均匀 · 背景简洁 · 保留尺子/标记 · 正面/侧面/顶面/斜角 · 每次 1~3 个零件</string>
+    <string name="btn_shutter">拍摄</string>
+    <string name="btn_done">完成</string>
+
+    <!-- Smart capture wizard -->
+    <string name="btn_smart_capture">智能采集（上传识别）</string>
+    <string name="wizard_need_top">第 1 步：正上方对准凸点面，距离约 20–30cm，保持清晰</string>
+    <string name="wizard_need_side">第 2 步：拍一张侧面（用于确认类型）</string>
+    <string name="wizard_need_angles">第 3 步：再拍 ≥2 个不同角度（凑够 4 张）</string>
+    <string name="wizard_ready">已采集足够帧，点「上传」开始识别</string>
+    <string name="wizard_capture">采集本帧</string>
+    <string name="wizard_upload">上传</string>
+    <string name="wizard_progress">正在上传与识别…</string>
+    <string name="kind_title">确认类型</string>
+    <string name="kind_brick">brick（高砖）</string>
+    <string name="kind_plate">plate（薄板）</string>
+    <string name="kind_tile">tile（无凸点平板）</string>
+    <string name="kind_slope">slope（斜面）</string>
+    <string name="result_title">识别结果</string>
+    <string name="result_preview">预览模型</string>
+    <string name="measure_title">引导测量</string>
+    <string name="measure_submit">提交测量</string>
+    <string name="settings_base_url">服务器地址</string>
+    <string name="settings_save_debug_gallery">调试：保存原图到相册</string>
+    <string name="frames_counter">已采集：%1$d 张</string>
+
+    <!-- ScanForge navigation / screens -->
+    <string name="nav_home">首页</string>
+    <string name="nav_library">采集库</string>
+    <string name="nav_settings">设置</string>
+    <string name="screen_session_detail">会话详情</string>
+    <string name="screen_frame_viewer">帧查看器</string>
+    <string name="screen_result">识别结果</string>
+    <string name="home_recognition_title">识别采集</string>
+    <string name="home_recognition_desc">拍积木 → 自动识别 → 参数化 3D 模型</string>
+    <string name="home_general_title">通用采集</string>
+    <string name="home_general_desc">RGB + 深度 + 点云，本地导出</string>
+    <string name="home_recent">最近采集</string>
+    <string name="home_recent_all">全部 ›</string>
+    <string name="lib_filter_all">全部</string>
+    <string name="lib_filter_recognized">已识别</string>
+    <string name="lib_filter_pending">待上传</string>
+    <string name="lib_empty">还没有采集记录</string>
+    <string name="frame_rgb">RGB</string>
+    <string name="frame_depth">深度</string>
+    <string name="action_preview_model">预览模型</string>
+    <string name="action_reupload">重新上传</string>
+    <string name="action_delete">删除</string>
+    <string name="settings_diagnostics">设备诊断</string>
+    <string name="general_coming_soon">通用采集将在下一阶段接入</string>
+</resources>

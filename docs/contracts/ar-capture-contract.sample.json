@@ -1,0 +1,41 @@
+{
+  "request_ar_metadata": {
+    "device": {"model": "PLG110", "arcore": "1.54.260890493"},
+    "recognition_frame": {
+      "image_intrinsics": {"fx": 433.81, "fy": 433.81, "cx": 320.0, "cy": 240.0, "width": 640, "height": 480},
+      "depth": {"width": 160, "height": 90, "format": "DEPTH16_MM"},
+      "camera_pose": {"t": [0.01, -0.02, 0.30], "q": [0.0, 0.0, 0.0, 1.0]},
+      "distance_m": 0.22584816,
+      "arcore_distance_m": 0.673,
+      "arcore_distance_source": "DEPTH",
+      "visual_distance_m": 0.22584816,
+      "visual_reference_width_px": 65.0,
+      "visual_reference_width_mm": 33.84,
+      "visual_reference_status": "DETECTED",
+      "distance_source_for_scale": "VISUAL_REFERENCE",
+      "distance_confidence": "HIGH",
+      "reference_mode_enabled": true,
+      "manual_measurement_recommended": false
+    },
+    "coarse_hints": null
+  },
+  "response_recognized": {
+    "capture_id": "uuid", "job_id": "uuid",
+    "recognized": {"system": "feile", "kind": "brick", "units_x": 2, "units_y": 4, "pitch_mm": 16.1, "confidence": 0.93},
+    "status": "recognized",
+    "needs_measurement": null
+  },
+  "response_needs_measurement": {
+    "capture_id": "uuid", "job_id": "uuid",
+    "recognized": {"system": "unknown", "kind": "brick"},
+    "status": "needs_measurement",
+    "needs_measurement": {
+      "guidance": "卡住可夹位置，(1A+1B)/2 互消误差",
+      "fields": [
+        {"key": "length", "label": "长", "unit": "mm"},
+        {"key": "width", "label": "宽", "unit": "mm"},
+        {"key": "height", "label": "高", "unit": "mm"}
+      ]
+    }
+  }
+}

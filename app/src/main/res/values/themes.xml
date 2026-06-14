@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.ARCoreVerify" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/sf_teal</item>
+    </style>
+    <!-- Compose host theme: dark, edge-to-edge friendly. -->
+    <style name="Theme.ScanForge" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowBackground">@color/sf_bg</item>
+    </style>
+</resources>

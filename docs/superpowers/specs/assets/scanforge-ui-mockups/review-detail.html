@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>③ 帧回看 · 会话详情 · 采集库</title>
+<style>
+    /*
+     * BRAINSTORM COMPANION FRAME TEMPLATE
+     *
+     * This template provides a consistent frame with:
+     * - OS-aware light/dark theming
+     * - Fixed header and selection indicator bar
+     * - Scrollable main content area
+     * - CSS helpers for common UI patterns
+     *
+     * Content is injected via placeholder comment in #claude-content.
+     */
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+
+    /* ===== THEME VARIABLES ===== */
+    :root {
+      --bg-primary: #f5f5f7;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #e5e5e7;
+      --border: #d1d1d6;
+      --text-primary: #1d1d1f;
+      --text-secondary: #86868b;
+      --text-tertiary: #aeaeb2;
+      --accent: #0071e3;
+      --accent-hover: #0077ed;
+      --success: #34c759;
+      --warning: #ff9f0a;
+      --error: #ff3b30;
+      --selected-bg: #e8f4fd;
+      --selected-border: #0071e3;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-primary: #1d1d1f;
+        --bg-secondary: #2d2d2f;
+        --bg-tertiary: #3d3d3f;
+        --border: #424245;
+        --text-primary: #f5f5f7;
+        --text-secondary: #86868b;
+        --text-tertiary: #636366;
+        --accent: #0a84ff;
+        --accent-hover: #409cff;
+        --selected-bg: rgba(10, 132, 255, 0.15);
+        --selected-border: #0a84ff;
+      }
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    /* ===== FRAME STRUCTURE ===== */
+    .header {
+      background: var(--bg-secondary);
+      padding: 0.5rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .header h1 { font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); }
+    .header .status { font-size: 0.7rem; color: var(--success); display: flex; align-items: center; gap: 0.4rem; }
+    .header .status::before { content: ''; width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
+
+    .main { flex: 1; overflow-y: auto; }
+    #claude-content { padding: 2rem; min-height: 100%; }
+
+    .indicator-bar {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      padding: 0.5rem 1.5rem;
+      flex-shrink: 0;
+      text-align: center;
+    }
+    .indicator-bar span {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    .indicator-bar .selected-text {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* ===== TYPOGRAPHY ===== */
+    h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .subtitle { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .section { margin-bottom: 2rem; }
+    .label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+
+    /* ===== OPTIONS (for A/B/C choices) ===== */
+    .options { display: flex; flex-direction: column; gap: 0.75rem; }
+    .option {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .option:hover { border-color: var(--accent); }
+    .option.selected { background: var(--selected-bg); border-color: var(--selected-border); }
+    .option .letter {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      width: 1.75rem; height: 1.75rem;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 0.85rem; flex-shrink: 0;
+    }
+    .option.selected .letter { background: var(--accent); color: white; }
+    .option .content { flex: 1; }
+    .option .content h3 { font-size: 0.95rem; margin-bottom: 0.15rem; }
+    .option .content p { color: var(--text-secondary); font-size: 0.85rem; margin: 0; }
+
+    /* ===== CARDS (for showing designs/mockups) ===== */
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .card.selected { border-color: var(--selected-border); border-width: 2px; }
+    .card-image { background: var(--bg-tertiary); aspect-ratio: 16/10; display: flex; align-items: center; justify-content: center; }
+    .card-body { padding: 1rem; }
+    .card-body h3 { margin-bottom: 0.25rem; }
+    .card-body p { color: var(--text-secondary); font-size: 0.85rem; }
+
+    /* ===== MOCKUP CONTAINER ===== */
+    .mockup {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .mockup-header {
+      background: var(--bg-tertiary);
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+    .mockup-body { padding: 1.5rem; }
+
+    /* ===== SPLIT VIEW (side-by-side comparison) ===== */
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 700px) { .split { grid-template-columns: 1fr; } }
+
+    /* ===== PROS/CONS ===== */
+    .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+    .pros, .cons { background: var(--bg-secondary); border-radius: 8px; padding: 1rem; }
+    .pros h4 { color: var(--success); font-size: 0.85rem; margin-bottom: 0.5rem; }
+    .cons h4 { color: var(--error); font-size: 0.85rem; margin-bottom: 0.5rem; }
+    .pros ul, .cons ul { margin-left: 1.25rem; font-size: 0.85rem; color: var(--text-secondary); }
+    .pros li, .cons li { margin-bottom: 0.25rem; }
+
+    /* ===== PLACEHOLDER (for mockup areas) ===== */
+    .placeholder {
+      background: var(--bg-tertiary);
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      color: var(--text-tertiary);
+    }
+
+    /* ===== INLINE MOCKUP ELEMENTS ===== */
+    .mock-nav { background: var(--accent); color: white; padding: 0.75rem 1rem; display: flex; gap: 1.5rem; font-size: 0.9rem; }
+    .mock-sidebar { background: var(--bg-tertiary); padding: 1rem; min-width: 180px; }
+    .mock-content { padding: 1.5rem; flex: 1; }
+    .mock-button { background: var(--accent); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.85rem; }
+    .mock-input { background: var(--bg-primary); border: 1px solid var(--border); border-radius: 6px; padding: 0.5rem; width: 100%; }
+  
+
+html,body{height:auto;overflow:visible}
+body{display:block;background:#1d1d1f}
+.main{overflow:visible}
+#claude-content{padding:1.25rem;min-height:0}
+:root{--bg-primary:#1d1d1f;--bg-secondary:#2d2d2f;--bg-tertiary:#3d3d3f;--border:#424245;
+--text-primary:#f5f5f7;--text-secondary:#9aa0a6;--text-tertiary:#636366;--accent:#1ED7B5;
+--accent-hover:#3fe6c8;--success:#34c759;--warning:#ff9f0a;--error:#ff3b30;
+--selected-bg:rgba(30,215,181,.15);--selected-border:#1ED7B5}
+</style>
+<script>function toggleSelect(){}</script>
+</head><body><div class="main"><div id="claude-content">
+<h2>第 3 节 · 帧回看 · 会话详情 · 采集库</h2>
+<p class="subtitle">你选的 C 方案落地：采集中即时回看（帧查看器）+ 主屏「采集库」持久历史。每帧都能切 RGB / 深度热力查看。</p>
+
+<style>
+  .rwrap{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start;justify-content:center}
+  .p{width:212px;height:404px;border-radius:24px;overflow:hidden;border:3px solid #222;
+     background:#0E1320;color:#E8EDF5;display:flex;flex-direction:column;font-size:11.5px}
+  .p .bar{padding:12px 13px;display:flex;align-items:center;gap:8px;background:#0A0E17;font-weight:600}
+  .p .bar .x{opacity:.7}.p .bar .sp{flex:1}
+  .tabs{display:flex;gap:6px;padding:9px 12px}
+  .tabs span{font-size:10px;padding:4px 10px;border-radius:11px;background:#161D2B;color:#9fb0c7}
+  .tabs span.on{background:#1ED7B5;color:#04201a;font-weight:700}
+  .lr{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid #1b2433}
+  .lr .t{width:40px;height:32px;border-radius:6px;flex:0 0 auto;
+         background:radial-gradient(circle at 50% 60%,#c9a24b 0 9px,#33425a 10px)}
+  .lr b{display:block;font-size:11.5px}.lr small{color:#7d8ca3;font-size:9px}
+  .tag{margin-left:auto;font-size:9px;padding:2px 7px;border-radius:9px}
+  .tag.ok{background:#163d2a;color:#56d39a}.tag.wait{background:#3d3416;color:#e3c156}
+
+  .shead{padding:12px 13px;background:#0d1421}
+  .shead b{font-size:14px}.shead small{display:block;color:#8aa0c0;font-size:10px;margin-top:3px}
+  .pill{display:inline-block;font-size:9px;padding:2px 8px;border-radius:9px;background:#163d2a;color:#56d39a;margin-top:6px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:11px 12px}
+  .gc{aspect-ratio:1/.82;border-radius:8px;position:relative;
+      background:radial-gradient(circle at 50% 58%,#c9a24b 0 13px,#33425a 14px)}
+  .gc b{position:absolute;right:3px;bottom:3px;width:13px;height:9px;border-radius:2px;background:linear-gradient(90deg,#ff2828,#2878ff)}
+  .gc s{position:absolute;left:3px;top:3px;font-size:8px;background:rgba(0,0,0,.5);border-radius:4px;padding:0 4px;text-decoration:none}
+  .acts{margin-top:auto;display:flex;gap:7px;padding:12px}
+  .acts span{flex:1;text-align:center;font-size:10px;padding:8px 0;border-radius:10px;background:#161D2B}
+  .acts span.pri{background:#1ED7B5;color:#04201a;font-weight:700}
+
+  .big{flex:1;position:relative;
+       background-image:radial-gradient(circle at 50% 50%,#c9a24b 0 56px,#8a6f33 56px 72px,transparent 73px),linear-gradient(180deg,#3a4a63,#1a212b)}
+  .big.depth{background-image:radial-gradient(circle at 50% 50%,rgba(255,40,40,1) 0 60px,rgba(255,180,30,1) 60px 100px,rgba(60,200,120,1) 100px 150px,rgba(40,120,255,1) 150px 100%)}
+  .vseg{position:absolute;top:10px;left:50%;transform:translateX(-50%);display:flex;background:rgba(0,0,0,.5);border-radius:12px;overflow:hidden}
+  .vseg span{font-size:10px;padding:4px 14px}.vseg span.on{background:#1ED7B5;color:#04201a;font-weight:700}
+  .meta{position:absolute;left:10px;bottom:56px;font-size:10px;background:rgba(0,0,0,.55);border-radius:8px;padding:5px 9px;line-height:1.5}
+  .leg{position:absolute;right:10px;bottom:56px;width:12px;height:80px;border-radius:6px;background:linear-gradient(180deg,#ff2828,#ffb41e,#3cc878,#2878ff)}
+  .nav{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:linear-gradient(0deg,rgba(0,0,0,.7),transparent)}
+  .nav .arr{font-size:18px}.nav .ic{font-size:15px;opacity:.85}
+  .cap{font-size:11px;opacity:.7;text-align:center;margin-top:5px}
+</style>
+
+<div class="rwrap">
+  <div><div class="p">
+    <div class="bar"><span class="sp">采集库 · 我的采集</span><span class="x">⌕</span></div>
+    <div class="tabs"><span class="on">全部</span><span>已识别</span><span>待上传</span></div>
+    <div class="lr"><span class="t"></span><div><b>part-9f3a · 4 帧</b><small>06-07 21:30 · PLG110</small></div><span class="tag ok">已识别</span></div>
+    <div class="lr"><span class="t"></span><div><b>part-12c8 · 5 帧</b><small>06-07 20:10 · 通用采集</small></div><span class="tag wait">待上传</span></div>
+    <div class="lr"><span class="t"></span><div><b>part-77ad · 4 帧</b><small>06-06 18:02 · PLG110</small></div><span class="tag ok">已识别</span></div>
+    <div class="lr"><span class="t"></span><div><b>part-3b1e · 6 帧</b><small>06-06 09:14 · 通用采集</small></div><span class="tag wait">已导出</span></div>
+  </div><div class="cap">① 采集库列表（可筛选）</div></div>
+
+  <div><div class="p">
+    <div class="bar"><span class="x">‹</span><span class="sp">会话 part-9f3a</span><span class="x">⋯</span></div>
+    <div class="shead"><b>feile · brick · 2×4</b><small>pitch 16.1mm · 置信度 0.93 · 06-07 21:30</small><span class="pill">已识别</span></div>
+    <div class="grid">
+      <div class="gc"><s>俯视</s><b></b></div><div class="gc"><s>侧</s><b></b></div><div class="gc"><s>角1</s><b></b></div>
+      <div class="gc"><s>角2</s><b></b></div>
+    </div>
+    <div class="acts"><span class="pri">预览模型</span><span>重新上传</span><span>删除</span></div>
+  </div><div class="cap">② 会话详情（逐帧 + 操作）</div></div>
+
+  <div><div class="p">
+    <div class="big depth">
+      <div class="vseg"><span>RGB</span><span class="on">深度</span></div>
+      <div class="meta">第 1/4 帧 · 俯视<br>中心 0.25m · 清晰度 182</div>
+      <div class="leg"></div>
+      <div class="nav"><span class="arr">‹</span><span class="ic">🗑 删除</span><span class="ic">↻ 重拍</span><span class="arr">›</span></div>
+    </div>
+  </div><div class="cap">③ 帧查看器（RGB/深度切换）</div></div>
+</div>
+
+<p class="subtitle" style="margin-top:14px">删除会同时清理本地留存文件；待上传会话可在库里重传，导出会话可再次分享。这版回看/库 OK 吗？</p>
+
+</div></div></body></html>

@@ -1,0 +1,118 @@
+<h2>测量向导每一步，示意图怎么呈现？</h2>
+<p class="subtitle">5 步向导，每步只填一个值。三种示意图方案 —— 点一个你偏好的。手机竖屏示意，结构为主。</p>
+
+<div class="cards">
+
+  <!-- ============ Option A: focused per-step diagram ============ -->
+  <div class="card" data-choice="A" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0b0d12;padding:10px">
+      <div style="background:#13161d;border-radius:14px;padding:12px;color:#e7eaf0;font-size:11px">
+        <div style="display:flex;justify-content:space-between;color:#9aa3af">
+          <span>人工测量建模</span><span>第 1 / 5 步</span>
+        </div>
+        <div style="display:flex;gap:5px;margin:8px 0">
+          <span style="flex:1;height:4px;border-radius:2px;background:#e8590c"></span>
+          <span style="flex:1;height:4px;border-radius:2px;background:#2a2f3a"></span>
+          <span style="flex:1;height:4px;border-radius:2px;background:#2a2f3a"></span>
+          <span style="flex:1;height:4px;border-radius:2px;background:#2a2f3a"></span>
+          <span style="flex:1;height:4px;border-radius:2px;background:#2a2f3a"></span>
+        </div>
+        <!-- focused: only 1A drawn, rest faded -->
+        <svg viewBox="0 0 300 150" style="width:100%;background:#fff;border-radius:8px">
+          <rect x="40" y="55" width="220" height="80" rx="6" fill="#f1f3f6" stroke="#cdd3dc"/>
+          <g fill="#eef1f5" stroke="#cdd3dc"><circle cx="78" cy="80" r="18"/><circle cx="138" cy="80" r="18"/><circle cx="198" cy="80" r="18"/><circle cx="258" cy="80" r="0"/></g>
+          <g fill="#eef1f5" stroke="#cdd3dc"><circle cx="78" cy="118" r="18"/><circle cx="138" cy="118" r="18"/><circle cx="198" cy="118" r="18"/></g>
+          <g stroke="#e8590c" stroke-width="3" fill="#e8590c">
+            <line x1="60" y1="30" x2="216" y2="30"/>
+            <line x1="60" y1="24" x2="60" y2="40"/><line x1="216" y1="24" x2="216" y2="40"/>
+            <text x="138" y="20" text-anchor="middle" font-size="13" font-weight="700">1A</text>
+          </g>
+        </svg>
+        <div style="margin-top:8px">
+          <span style="background:#e8590c;color:#fff;border-radius:6px;padding:1px 7px;font-weight:700">1A</span>
+          <b style="margin-left:6px">外径距 outer_pitch</b>
+        </div>
+        <div style="color:#9aa3af;margin-top:3px">砖块总长，跨两端凸点圆周最远点（卡尺跨外）</div>
+        <div style="margin-top:8px;background:#1b1f28;border:1px solid #2a2f3a;border-radius:8px;padding:8px;display:flex;justify-content:space-between">
+          <span style="color:#6b7280">点此输入…</span><span style="color:#6b7280">mm</span>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <span style="flex:1;text-align:center;border:1px solid #2a2f3a;border-radius:8px;padding:7px;color:#9aa3af">上一步</span>
+          <span style="flex:1;text-align:center;background:#e8590c;border-radius:8px;padding:7px;color:#fff;font-weight:700">下一步</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A · 每步聚焦图（推荐）</h3>
+      <p>每步只画当前测量，其余凸点淡化。高亮线随步骤切换（1A/1B/③ 用俯视，②/④ 用侧视）。原生绘制，信息量最小、最不容易看错。</p>
+    </div>
+  </div>
+
+  <!-- ============ Option B: full reference image ============ -->
+  <div class="card" data-choice="B" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0b0d12;padding:10px">
+      <div style="background:#13161d;border-radius:14px;padding:12px;color:#e7eaf0;font-size:11px">
+        <div style="display:flex;justify-content:space-between;color:#9aa3af">
+          <span>人工测量建模</span><span>第 1 / 5 步</span>
+        </div>
+        <!-- full annotated reference (busy, all 5 shown) -->
+        <svg viewBox="0 0 300 150" style="width:100%;background:#fff;border-radius:8px;margin-top:8px">
+          <rect x="8" y="10" width="135" height="130" rx="4" fill="#fafafa" stroke="#cbd5e1"/>
+          <rect x="40" y="55" width="70" height="60" fill="#dbeafe" stroke="#1e3a8a"/>
+          <circle cx="58" cy="73" r="13" fill="#fef3c7" stroke="#92400e"/><circle cx="92" cy="73" r="13" fill="#fef3c7" stroke="#92400e"/>
+          <circle cx="58" cy="97" r="13" fill="#fef3c7" stroke="#92400e"/><circle cx="92" cy="97" r="13" fill="#fef3c7" stroke="#92400e"/>
+          <line x1="45" y1="40" x2="105" y2="40" stroke="#0f172a"/><text x="20" y="30" font-size="9" fill="#3b82f6" font-weight="700">1A·1B·③</text>
+          <rect x="152" y="10" width="140" height="130" rx="4" fill="#fafafa" stroke="#cbd5e1"/>
+          <rect x="185" y="70" width="70" height="45" fill="#dbeafe" stroke="#1e3a8a"/>
+          <path d="M195 70 a12 12 0 0 1 24 0 z" fill="#fef3c7" stroke="#92400e"/><path d="M225 70 a12 12 0 0 1 24 0 z" fill="#fef3c7" stroke="#92400e"/>
+          <line x1="172" y1="58" x2="172" y2="115" stroke="#0f172a"/><text x="262" y="30" font-size="9" fill="#3b82f6" font-weight="700">②·④</text>
+        </svg>
+        <!-- legend list, current row highlighted -->
+        <div style="margin-top:8px;font-size:10px">
+          <div style="background:#e8590c22;border-left:3px solid #e8590c;padding:4px 6px;border-radius:4px"><b style="color:#e8590c">1A</b> 外径距 ← 当前</div>
+          <div style="padding:4px 6px;color:#9aa3af">1B 内径距 · ③ 凸点直径 · ② 净高 · ④ 总高</div>
+        </div>
+        <div style="margin-top:8px;background:#1b1f28;border:1px solid #2a2f3a;border-radius:8px;padding:8px;display:flex;justify-content:space-between">
+          <span style="color:#6b7280">点此输入…</span><span style="color:#6b7280">mm</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B · 完整示意图（复用 SVG）</h3>
+      <p>直接打包后端的 <code>measure-block-annotated.svg</code>，每步显示同一张全图，靠下方图例高亮当前项。和网页端/后端完全一致，但单步信息偏多。</p>
+    </div>
+  </div>
+
+  <!-- ============ Option C: hybrid ============ -->
+  <div class="card" data-choice="C" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0b0d12;padding:10px">
+      <div style="background:#13161d;border-radius:14px;padding:12px;color:#e7eaf0;font-size:11px">
+        <div style="display:flex;justify-content:space-between;color:#9aa3af">
+          <span>人工测量建模</span><span>第 1 / 5 步</span>
+        </div>
+        <svg viewBox="0 0 300 120" style="width:100%;background:#fff;border-radius:8px;margin-top:8px">
+          <rect x="40" y="40" width="220" height="70" rx="6" fill="#f1f3f6" stroke="#cdd3dc"/>
+          <g fill="#eef1f5" stroke="#cdd3dc"><circle cx="78" cy="62" r="16"/><circle cx="138" cy="62" r="16"/><circle cx="198" cy="62" r="16"/></g>
+          <g stroke="#e8590c" stroke-width="3" fill="#e8590c">
+            <line x1="62" y1="22" x2="214" y2="22"/><line x1="62" y1="16" x2="62" y2="30"/><line x1="214" y1="16" x2="214" y2="30"/>
+            <text x="138" y="13" text-anchor="middle" font-size="12" font-weight="700">1A</text>
+          </g>
+        </svg>
+        <div style="margin-top:6px;text-align:center;color:#4dabf7;border:1px dashed #2a3a4a;border-radius:8px;padding:5px">🔍 查看完整示意图</div>
+        <div style="margin-top:8px">
+          <span style="background:#e8590c;color:#fff;border-radius:6px;padding:1px 7px;font-weight:700">1A</span>
+          <b style="margin-left:6px">外径距 outer_pitch</b>
+        </div>
+        <div style="margin-top:6px;background:#1b1f28;border:1px solid #2a2f3a;border-radius:8px;padding:8px;display:flex;justify-content:space-between">
+          <span style="color:#6b7280">点此输入…</span><span style="color:#6b7280">mm</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C · 聚焦图 + 完整图入口</h3>
+      <p>默认显示每步聚焦图（同 A），另给一个「查看完整示意图」按钮，点开后端那张全图当参考。兼顾干净与完整，多一个交互件。</p>
+    </div>
+  </div>
+
+</div>
+<p class="subtitle" style="margin-top:14px">我的推荐是 <b>A</b>：兜底流程的目标就是「一眼知道量哪里」，每步只画一个测量最不容易出错。也可以选 B/C，或在终端补充想法。</p>

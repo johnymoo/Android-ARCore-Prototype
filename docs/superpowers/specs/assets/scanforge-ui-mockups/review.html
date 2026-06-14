@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>⑥ 采集后查看方向 — 选定 C · 即时回看条 + 持久采集库</title>
+<style>
+    /*
+     * BRAINSTORM COMPANION FRAME TEMPLATE
+     *
+     * This template provides a consistent frame with:
+     * - OS-aware light/dark theming
+     * - Fixed header and selection indicator bar
+     * - Scrollable main content area
+     * - CSS helpers for common UI patterns
+     *
+     * Content is injected via placeholder comment in #claude-content.
+     */
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+
+    /* ===== THEME VARIABLES ===== */
+    :root {
+      --bg-primary: #f5f5f7;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #e5e5e7;
+      --border: #d1d1d6;
+      --text-primary: #1d1d1f;
+      --text-secondary: #86868b;
+      --text-tertiary: #aeaeb2;
+      --accent: #0071e3;
+      --accent-hover: #0077ed;
+      --success: #34c759;
+      --warning: #ff9f0a;
+      --error: #ff3b30;
+      --selected-bg: #e8f4fd;
+      --selected-border: #0071e3;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-primary: #1d1d1f;
+        --bg-secondary: #2d2d2f;
+        --bg-tertiary: #3d3d3f;
+        --border: #424245;
+        --text-primary: #f5f5f7;
+        --text-secondary: #86868b;
+        --text-tertiary: #636366;
+        --accent: #0a84ff;
+        --accent-hover: #409cff;
+        --selected-bg: rgba(10, 132, 255, 0.15);
+        --selected-border: #0a84ff;
+      }
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    /* ===== FRAME STRUCTURE ===== */
+    .header {
+      background: var(--bg-secondary);
+      padding: 0.5rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .header h1 { font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); }
+    .header .status { font-size: 0.7rem; color: var(--success); display: flex; align-items: center; gap: 0.4rem; }
+    .header .status::before { content: ''; width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
+
+    .main { flex: 1; overflow-y: auto; }
+    #claude-content { padding: 2rem; min-height: 100%; }
+
+    .indicator-bar {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      padding: 0.5rem 1.5rem;
+      flex-shrink: 0;
+      text-align: center;
+    }
+    .indicator-bar span {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    .indicator-bar .selected-text {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* ===== TYPOGRAPHY ===== */
+    h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .subtitle { color: var(--text-secondary); margin-bottom: 1.5rem; }
+    .section { margin-bottom: 2rem; }
+    .label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+
+    /* ===== OPTIONS (for A/B/C choices) ===== */
+    .options { display: flex; flex-direction: column; gap: 0.75rem; }
+    .option {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .option:hover { border-color: var(--accent); }
+    .option.selected { background: var(--selected-bg); border-color: var(--selected-border); }
+    .option .letter {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      width: 1.75rem; height: 1.75rem;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 0.85rem; flex-shrink: 0;
+    }
+    .option.selected .letter { background: var(--accent); color: white; }
+    .option .content { flex: 1; }
+    .option .content h3 { font-size: 0.95rem; margin-bottom: 0.15rem; }
+    .option .content p { color: var(--text-secondary); font-size: 0.85rem; margin: 0; }
+
+    /* ===== CARDS (for showing designs/mockups) ===== */
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .card.selected { border-color: var(--selected-border); border-width: 2px; }
+    .card-image { background: var(--bg-tertiary); aspect-ratio: 16/10; display: flex; align-items: center; justify-content: center; }
+    .card-body { padding: 1rem; }
+    .card-body h3 { margin-bottom: 0.25rem; }
+    .card-body p { color: var(--text-secondary); font-size: 0.85rem; }
+
+    /* ===== MOCKUP CONTAINER ===== */
+    .mockup {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .mockup-header {
+      background: var(--bg-tertiary);
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+    .mockup-body { padding: 1.5rem; }
+
+    /* ===== SPLIT VIEW (side-by-side comparison) ===== */
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 700px) { .split { grid-template-columns: 1fr; } }
+
+    /* ===== PROS/CONS ===== */
+    .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+    .pros, .cons { background: var(--bg-secondary); border-radius: 8px; padding: 1rem; }
+    .pros h4 { color: var(--success); font-size: 0.85rem; margin-bottom: 0.5rem; }
+    .cons h4 { color: var(--error); font-size: 0.85rem; margin-bottom: 0.5rem; }
+    .pros ul, .cons ul { margin-left: 1.25rem; font-size: 0.85rem; color: var(--text-secondary); }
+    .pros li, .cons li { margin-bottom: 0.25rem; }
+
+    /* ===== PLACEHOLDER (for mockup areas) ===== */
+    .placeholder {
+      background: var(--bg-tertiary);
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      color: var(--text-tertiary);
+    }
+
+    /* ===== INLINE MOCKUP ELEMENTS ===== */
+    .mock-nav { background: var(--accent); color: white; padding: 0.75rem 1rem; display: flex; gap: 1.5rem; font-size: 0.9rem; }
+    .mock-sidebar { background: var(--bg-tertiary); padding: 1rem; min-width: 180px; }
+    .mock-content { padding: 1.5rem; flex: 1; }
+    .mock-button { background: var(--accent); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.85rem; }
+    .mock-input { background: var(--bg-primary); border: 1px solid var(--border); border-radius: 6px; padding: 0.5rem; width: 100%; }
+  
+
+html,body{height:auto;overflow:visible}
+body{display:block;background:#1d1d1f}
+.main{overflow:visible}
+#claude-content{padding:1.25rem;min-height:0}
+:root{--bg-primary:#1d1d1f;--bg-secondary:#2d2d2f;--bg-tertiary:#3d3d3f;--border:#424245;
+--text-primary:#f5f5f7;--text-secondary:#9aa0a6;--text-tertiary:#636366;--accent:#1ED7B5;
+--accent-hover:#3fe6c8;--success:#34c759;--warning:#ff9f0a;--error:#ff3b30;
+--selected-bg:rgba(30,215,181,.15);--selected-border:#1ED7B5}
+</style>
+<script>function toggleSelect(){}</script>
+</head><body><div class="main"><div id="claude-content">
+<h2>采集后如何在 App 内查看？</h2>
+<p class="subtitle">现状：拍完帧只存内存/磁盘，App 内无法回看；结果页只显示后端结论。下面 3 种是"看回自己拍的每一帧 RGB / 深度"的方式。</p>
+
+<style>
+  .ph { position:relative; width:200px; height:320px; border-radius:22px; overflow:hidden;
+        margin:0 auto; border:3px solid #2a2a2a; background:#0e1320; color:#e8edf5; font-size:11px; }
+  .ph .bar { background:#161d2b; padding:8px 10px; font-weight:600; }
+  .scene { background:
+        radial-gradient(circle at 50% 55%, #c9a24b 0 26px, #8a6f33 26px 34px, transparent 35px),
+        linear-gradient(180deg,#3a4a63,#1a212b); }
+  .seg { display:flex; gap:6px; padding:8px 10px; }
+  .seg span { font-size:10px; padding:3px 10px; border-radius:11px; background:#222c3d; }
+  .seg span.on { background:#3b6cf6; color:#fff; }
+  .strip { position:absolute; left:0; right:0; bottom:0; display:flex; gap:6px; padding:8px;
+           background:#0c1019; overflow:hidden; }
+  .strip i { width:38px; height:30px; border-radius:5px; position:relative; flex:0 0 auto;
+             background:radial-gradient(circle at 50% 60%,#c9a24b 0 8px,#3a4a63 9px); }
+  .strip i.sel { outline:2px solid #3b6cf6; }
+  .strip i b { position:absolute; right:1px; bottom:1px; width:11px; height:8px; border-radius:2px;
+               background:linear-gradient(90deg,#ff2828,#2878ff); }
+  .acts { position:absolute; right:8px; top:46px; display:flex; flex-direction:column; gap:6px; }
+  .acts u { text-decoration:none; background:rgba(0,0,0,.55); border-radius:8px; padding:4px 7px; font-size:14px; }
+  .row { display:flex; align-items:center; gap:8px; padding:9px 10px; border-bottom:1px solid #1b2433; }
+  .row .tn { width:42px; height:34px; border-radius:6px;
+             background:radial-gradient(circle at 50% 60%,#c9a24b 0 9px,#3a4a63 10px); flex:0 0 auto; }
+  .row .meta b { display:block; font-size:11px; }
+  .row .meta s { display:block; text-decoration:none; color:#8aa0c0; font-size:9px; }
+  .tag { margin-left:auto; font-size:9px; padding:2px 7px; border-radius:9px; }
+  .tag.ok { background:#163d2a; color:#56d39a; }
+  .tag.wait { background:#3d3416; color:#e3c156; }
+</style>
+
+<div class="cards">
+  <div class="card" data-choice="inline" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0e1320;padding:14px 0">
+      <div class="ph">
+        <div class="bar">本次采集 · 第 3 / 4 帧</div>
+        <div class="scene" style="height:150px;position:relative">
+          <div class="acts"><u>🗑️</u><u>↻</u></div>
+        </div>
+        <div class="seg"><span class="on">RGB</span><span>深度</span></div>
+        <div class="strip"><i></i><i></i><i class="sel"><b></b></i><i></i></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A · 采集中即时回看条</h3>
+      <p>向导底部一条缩略图带，点开看大图，可 RGB/深度 切换、删除、重拍。聚焦"本次会话"，拍完立刻能检查。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="library" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0e1320;padding:14px 0">
+      <div class="ph">
+        <div class="bar">我的采集</div>
+        <div class="row"><div class="tn"></div><div class="meta"><b>part-9f3a · 4 帧</b><s>06-07 21:30</s></div><div class="tag ok">已识别</div></div>
+        <div class="row"><div class="tn"></div><div class="meta"><b>part-12c8 · 5 帧</b><s>06-07 20:10</s></div><div class="tag wait">待上传</div></div>
+        <div class="row"><div class="tn"></div><div class="meta"><b>part-77ad · 4 帧</b><s>06-06 18:02</s></div><div class="tag ok">已识别</div></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B · 持久采集历史库</h3>
+      <p>主屏入口进"我的采集"，列出历史所有采集会话与状态（已识别/待上传），点进去看每帧、可重传。像相册/历史。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="both" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0e1320;padding:14px 0">
+      <div class="ph">
+        <div class="bar">即时回看 + 历史库</div>
+        <div class="scene" style="height:120px"></div>
+        <div class="strip" style="position:static"><i></i><i class="sel"><b></b></i><i></i><i></i></div>
+        <div class="row" style="margin-top:4px"><div class="tn"></div><div class="meta"><b>历史：part-9f3a</b><s>已识别 · 可重看</s></div><div class="tag ok">↗</div></div>
+        <div class="row"><div class="tn"></div><div class="meta"><b>历史：part-12c8</b><s>待上传 · 可重传</s></div><div class="tag wait">↗</div></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C · 二合一（推荐）</h3>
+      <p>采集中底部缩略图条即时回看/重拍；主屏再给一个"采集历史库"入口看过往会话与上传结果。最完整。</p>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:16px">每帧都能切 RGB / 深度热力查看；删除会同时清掉本地留存。可点选方向，也可补充想法。</p>
+
+</div></div></body></html>
