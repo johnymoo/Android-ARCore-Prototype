@@ -1,64 +1,109 @@
 package com.johnymoo.arverify.result
 
-import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.View
 import android.webkit.WebView
-import androidx.appcompat.app.AppCompatActivity
-import com.johnymoo.arverify.R
-import com.johnymoo.arverify.databinding.ActivityResultBinding
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.johnymoo.arverify.net.RecognitionStatus
 import com.johnymoo.arverify.net.UploadOutcome
 import com.johnymoo.arverify.net.UploadResultHolder
-import com.johnymoo.arverify.ui.applyContentSystemBarPadding
+import com.johnymoo.arverify.ui.components.ScreenScaffold
+import com.johnymoo.arverify.ui.components.SectionCard
+import com.johnymoo.arverify.ui.components.StatusPill
+import com.johnymoo.arverify.ui.theme.ScanForgeTheme
+import com.johnymoo.arverify.ui.theme.SfMuted
+import com.johnymoo.arverify.ui.theme.SfOk
+import com.johnymoo.arverify.ui.theme.SfOkBg
 
-class ResultActivity : AppCompatActivity() {
-
-    private lateinit var binding: ActivityResultBinding
-
-    @SuppressLint("SetJavaScriptEnabled")
+class ResultActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityResultBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        binding.root.applyContentSystemBarPadding()
-
-        val outcome = UploadResultHolder.outcome
-        if (outcome !is UploadOutcome.Success) {
-            binding.tvResult.text = "无识别结果"
-            return
+        enableEdgeToEdge()
+        val outcome = UploadResultHolder.outcome as? UploadOutcome.Success
+        val r = outcome?.result
+        val jobId = r?.jobId
+        // Contract note: confirm asset-id field with the pairing spec.
+        val glbUrl = if (r?.status == RecognitionStatus.RECOGNIZED && !jobId.isNullOrBlank()) {
+            UploadResultHolder.baseUrl.trimEnd('/') + "/assets/" + jobId
+        } else {
+            null
         }
-        val r = outcome.result
-        binding.tvResult.text = buildString {
-            appendLine("状态：${r.status}")
-            r.recognized?.let {
-                appendLine("system：${it.system ?: "-"}")
-                appendLine("kind：${it.kind ?: "-"}")
-                appendLine("units：${it.unitsX ?: "-"} × ${it.unitsY ?: "-"}")
-                appendLine("pitch_mm：${it.pitchMm ?: "-"}")
-                appendLine("confidence：${it.confidence ?: "-"}")
+
+        setContent {
+            ScanForgeTheme {
+                ScreenScaffold(title = "识别结果", onBack = { finish() }) { pad ->
+                    Column(
+                        Modifier
+                            .padding(pad)
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        if (r == null) {
+                            Text("无识别结果")
+                            return@Column
+                        }
+                        SectionCard {
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text(
+                                    "${r.recognized?.system ?: "-"} · ${r.recognized?.kind ?: "-"} · " +
+                                        "${r.recognized?.unitsX ?: "-"}×${r.recognized?.unitsY ?: "-"}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                )
+                                if (r.status == RecognitionStatus.RECOGNIZED) {
+                                    StatusPill("已识别", SfOkBg, SfOk)
+                                }
+                            }
+                            Text(
+                                "pitch ${r.recognized?.pitchMm ?: "-"}mm · 置信度 ${r.recognized?.confidence ?: "-"}",
+                                color = SfMuted,
+                                style = MaterialTheme.typography.labelSmall,
+                                modifier = Modifier.padding(top = 4.dp),
+                            )
+                        }
+                        var showModel by remember { mutableStateOf(false) }
+                        if (glbUrl != null) {
+                            Button(onClick = { showModel = true }, modifier = Modifier.fillMaxWidth()) {
+                                Text("预览模型")
+                            }
+                        }
+                        if (showModel && glbUrl != null) {
+                            AndroidView(
+                                factory = { ctx ->
+                                    WebView(ctx).apply {
+                                        settings.javaScriptEnabled = true
+                                        settings.allowFileAccess = true
+                                        webViewClient = object : android.webkit.WebViewClient() {
+                                            override fun onPageFinished(view: WebView?, url: String?) {
+                                                view?.evaluateJavascript("loadModel('$glbUrl')", null)
+                                            }
+                                        }
+                                        loadUrl("file:///android_asset/viewer.html")
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth().weight(1f),
+                            )
+                        }
+                    }
+                }
             }
         }
-
-        val jobId = r.jobId
-        if (r.status == RecognitionStatus.RECOGNIZED && !jobId.isNullOrBlank()) {
-            // Contract note: confirm asset-id field with the pairing spec.
-            val glbUrl = UploadResultHolder.baseUrl.trimEnd('/') + "/assets/" + jobId
-            binding.btnPreview.isEnabled = true
-            binding.btnPreview.setOnClickListener { showModel(glbUrl) }
-        }
-    }
-
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun showModel(glbUrl: String) {
-        binding.webView.visibility = View.VISIBLE
-        binding.webView.settings.javaScriptEnabled = true
-        binding.webView.settings.allowFileAccess = true
-        binding.webView.webViewClient = object : android.webkit.WebViewClient() {
-            override fun onPageFinished(view: WebView?, url: String?) {
-                view?.evaluateJavascript("loadModel('${glbUrl}')", null)
-            }
-        }
-        binding.webView.loadUrl("file:///android_asset/viewer.html")
     }
 }
