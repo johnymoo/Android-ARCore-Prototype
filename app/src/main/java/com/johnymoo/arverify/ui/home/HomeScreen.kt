@@ -2,6 +2,7 @@ package com.johnymoo.arverify.ui.home
 
 import android.content.Intent
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,9 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,6 +31,7 @@ import com.johnymoo.arverify.session.SessionEntry
 import com.johnymoo.arverify.ui.common.SessionPaths
 import com.johnymoo.arverify.ui.library.SessionRow
 import com.johnymoo.arverify.ui.nav.Routes
+import com.johnymoo.arverify.ui.theme.SfBorder
 import com.johnymoo.arverify.ui.theme.SfTeal
 
 @Composable
@@ -41,13 +42,6 @@ fun HomeScreen(nav: NavController) {
     LifecycleResumeEffect(Unit) { recent = repo.listSessions().take(3); onPauseOrDispose {} }
 
     LazyColumn(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item {
-            Row {
-                Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleLarge)
-                Text("  " + stringResource(R.string.brand_en),
-                    style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        }
         item {
             EntryCard(
                 title = stringResource(R.string.home_recognition_title),
@@ -87,11 +81,15 @@ fun HomeScreen(nav: NavController) {
 
 @Composable
 private fun EntryCard(title: String, desc: String, primary: Boolean, onClick: () -> Unit) {
-    Card(
-        Modifier.fillMaxWidth().clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = if (primary) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface,
+    Surface(
+        onClick = onClick,
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(
+            1.dp,
+            if (primary) SfTeal else SfBorder,
         ),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(16.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium,
