@@ -25,7 +25,7 @@ import com.johnymoo.arverify.config.CaptureConfig
 import com.johnymoo.arverify.databinding.ActivityCaptureWizardBinding
 import com.johnymoo.arverify.debug.DebugGallerySaver
 import com.johnymoo.arverify.imaging.Depth16PngWriter
-import com.johnymoo.arverify.measure.MeasurementFormActivity
+import com.johnymoo.arverify.measure.MeasurementWizardActivity
 import com.johnymoo.arverify.metadata.ArMetadata
 import com.johnymoo.arverify.metadata.ArMetadataSerializer
 import com.johnymoo.arverify.metadata.CameraIntrinsics
@@ -376,7 +376,7 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
             is UploadOutcome.Failure -> toast("上传失败：${outcome.message}（已本地留存，可重试）")
             is UploadOutcome.Success -> when (outcome.result.status) {
                 RecognitionStatus.NEEDS_MEASUREMENT ->
-                    startActivity(Intent(this, MeasurementFormActivity::class.java))
+                    startActivity(Intent(this, MeasurementWizardActivity::class.java))
                 else ->
                     startActivity(Intent(this, ResultActivity::class.java))
             }

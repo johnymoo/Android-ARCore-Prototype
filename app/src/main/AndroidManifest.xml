@@ -50,7 +50,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".measure.MeasurementFormActivity"
+            android:name=".measure.MeasurementWizardActivity"
             android:exported="false" />
 
         <activity

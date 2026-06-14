@@ -18,7 +18,7 @@ data class Recognized(
 data class MeasurementField(val key: String?, val label: String?, val unit: String?)
 
 /** Guided-caliper fallback payload. */
-data class NeedsMeasurement(val fields: List<MeasurementField>, val guidance: String?)
+data class NeedsMeasurement(val fields: List<MeasurementField>, val guidance: String?, val reason: String?)
 
 /** Parsed `POST /api/v1/ar-captures` response. */
 data class RecognitionResult(
@@ -70,7 +70,7 @@ object RecognitionResultModel {
                         else -> MeasurementField(key = null, label = null, unit = null)
                     }
                 }
-                NeedsMeasurement(fields = fields, guidance = str(nm, "guidance"))
+                NeedsMeasurement(fields = fields, guidance = str(nm, "guidance"), reason = str(nm, "reason"))
             },
         )
     }

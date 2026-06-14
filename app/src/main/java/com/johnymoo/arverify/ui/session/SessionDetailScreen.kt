@@ -100,7 +100,7 @@ fun SessionDetailScreen(nav: NavController, dirPath: String) {
                                 if (outcome is com.johnymoo.arverify.net.UploadOutcome.Success) {
                                     when (outcome.result.status) {
                                         com.johnymoo.arverify.net.RecognitionStatus.NEEDS_MEASUREMENT ->
-                                            context.startActivity(android.content.Intent(context, com.johnymoo.arverify.measure.MeasurementFormActivity::class.java))
+                                            context.startActivity(android.content.Intent(context, com.johnymoo.arverify.measure.MeasurementWizardActivity::class.java))
                                         else ->
                                             context.startActivity(android.content.Intent(context, com.johnymoo.arverify.result.ResultActivity::class.java))
                                     }

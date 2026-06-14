@@ -66,6 +66,24 @@ class RecognitionResultModelTest {
         assertEquals("g", r.needsMeasurement?.guidance)
     }
 
+    @Test fun parsesNeedsMeasurementReason() {
+        val json = """
+            {"status":"needs_measurement",
+             "recognized":{"system":null,"kind":"brick","units_x":22,"units_y":14,
+                           "pitch_mm":163.668,"confidence":0.0},
+             "needs_measurement":{
+               "fields":["outer_pitch_mm","inner_pitch_mm","stud_diameter_mm",
+                         "brick_height_net_mm","brick_height_total_mm"],
+               "reason":"pitch did not match a known system within tolerance/confidence"}}
+        """.trimIndent()
+        val r = RecognitionResultModel.parse(json)
+        assertEquals("pitch did not match a known system within tolerance/confidence",
+            r.needsMeasurement?.reason)
+        assertEquals(5, r.needsMeasurement?.fields?.size)
+        assertEquals("brick", r.recognized?.kind)
+        assertEquals(0.0, r.recognized?.confidence!!, 1e-9)
+    }
+
     @Test fun parsesBackendStringMeasurementFields() {
         val r = RecognitionResultModel.parse(
             """

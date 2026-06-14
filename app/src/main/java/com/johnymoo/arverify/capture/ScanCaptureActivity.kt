@@ -110,7 +110,7 @@ class ScanCaptureActivity : ComponentActivity() {
                 toast("上传失败：${outcome.message}（已本地留存，可在采集库重试）")
             is com.johnymoo.arverify.net.UploadOutcome.Success -> when (outcome.result.status) {
                 com.johnymoo.arverify.net.RecognitionStatus.NEEDS_MEASUREMENT ->
-                    startActivity(android.content.Intent(this, com.johnymoo.arverify.measure.MeasurementFormActivity::class.java))
+                    startActivity(android.content.Intent(this, com.johnymoo.arverify.measure.MeasurementWizardActivity::class.java))
                 else ->
                     startActivity(android.content.Intent(this, com.johnymoo.arverify.result.ResultActivity::class.java))
             }
