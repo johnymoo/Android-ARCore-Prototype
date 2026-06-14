@@ -2,7 +2,6 @@ package com.johnymoo.arverify.ui.library
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -33,6 +31,8 @@ import com.johnymoo.arverify.session.CaptureLibraryRepository
 import com.johnymoo.arverify.session.SessionEntry
 import com.johnymoo.arverify.session.SessionStatus
 import com.johnymoo.arverify.ui.common.SessionPaths
+import com.johnymoo.arverify.ui.components.EmptyState
+import com.johnymoo.arverify.ui.components.StatusPill
 import com.johnymoo.arverify.ui.nav.Routes
 import com.johnymoo.arverify.ui.theme.SfOk
 import com.johnymoo.arverify.ui.theme.SfOkBg
@@ -50,16 +50,13 @@ fun LibraryScreen(nav: NavController) {
     LifecycleResumeEffect(Unit) { vm.refresh(); onPauseOrDispose {} }
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
-        Text(stringResource(R.string.nav_library), style = MaterialTheme.typography.titleLarge)
         Row(Modifier.padding(vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FilterTab(stringResource(R.string.lib_filter_all), state.filter == LibraryFilter.ALL) { vm.setFilter(LibraryFilter.ALL) }
             FilterTab(stringResource(R.string.lib_filter_recognized), state.filter == LibraryFilter.RECOGNIZED) { vm.setFilter(LibraryFilter.RECOGNIZED) }
             FilterTab(stringResource(R.string.lib_filter_pending), state.filter == LibraryFilter.PENDING) { vm.setFilter(LibraryFilter.PENDING) }
         }
         if (!state.loading && state.visible.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(stringResource(R.string.lib_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
+            EmptyState(stringResource(R.string.lib_empty))
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 items(state.visible) { entry ->
@@ -87,22 +84,17 @@ fun SessionRow(entry: SessionEntry, onClick: () -> Unit) {
             Text("${SessionDisplay.captureTime(s.createdAtEpochMs)} · ${s.deviceModel}", style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        StatusBadge(s.status)
+        val (text, bg, fg) = statusColors(s.status)
+        StatusPill(text, bg, fg)
     }
 }
 
 @Composable
-private fun StatusBadge(status: SessionStatus) {
-    val (text, bg, fg) = when (status) {
+private fun statusColors(status: SessionStatus): Triple<String, androidx.compose.ui.graphics.Color, androidx.compose.ui.graphics.Color> =
+    when (status) {
         SessionStatus.RECOGNIZED -> Triple("已识别", SfOkBg, SfOk)
         SessionStatus.EXPORTED -> Triple("已导出", SfOkBg, SfOk)
         SessionStatus.PENDING_UPLOAD -> Triple("待上传", SfWaitBg, SfWait)
         SessionStatus.NEEDS_MEASUREMENT -> Triple("待测量", SfWaitBg, SfWait)
         SessionStatus.FAILED -> Triple("失败", SfWaitBg, SfWait)
     }
-    androidx.compose.material3.Surface(color = bg, shape = MaterialTheme.shapes.small) {
-        Text(text, color = fg, fontWeight = FontWeight.SemiBold,
-            style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
-    }
-}
