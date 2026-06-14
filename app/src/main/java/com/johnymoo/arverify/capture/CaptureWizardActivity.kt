@@ -429,6 +429,8 @@ class CaptureWizardActivity : AppCompatActivity(), GLSurfaceView.Renderer {
                 visualReferenceStatus = topScaleDistance.visualReferenceStatus,
                 distanceSourceForScale = topScaleDistance.distanceSourceForScale.name,
                 distanceConfidence = topScaleDistance.distanceConfidence.name,
+                referenceModeEnabled = topScaleDistance.referenceModeEnabled,
+                manualMeasurementRecommended = topScaleDistance.manualMeasurementRecommended,
             ),
             coarseHints = null, // on-device stud counting deferred (plan scope)
         )

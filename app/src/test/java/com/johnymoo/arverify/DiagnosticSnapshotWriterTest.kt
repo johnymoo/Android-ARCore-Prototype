@@ -37,6 +37,8 @@ class DiagnosticSnapshotWriterTest {
             visualReferenceStatus = "DETECTED",
             distanceSourceForScale = "VISUAL_REFERENCE",
             distanceConfidence = "HIGH",
+            referenceModeEnabled = true,
+            manualMeasurementRecommended = false,
             sharpness = 73.0,
             depthAvailable = true,
             depthUnavailableReason = null,
@@ -75,6 +77,8 @@ class DiagnosticSnapshotWriterTest {
         assertEquals(65.0, json["visual_reference_width_px"].asDouble, 0.0)
         assertEquals("VISUAL_REFERENCE", json["distance_source_for_scale"].asString)
         assertEquals("HIGH", json["distance_confidence"].asString)
+        assertEquals(true, json["reference_mode_enabled"].asBoolean)
+        assertEquals(false, json["manual_measurement_recommended"].asBoolean)
         assertTrue(json["depth_available"].asBoolean)
     }
 }

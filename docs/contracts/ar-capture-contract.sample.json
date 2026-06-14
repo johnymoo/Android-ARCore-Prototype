@@ -13,7 +13,9 @@
       "visual_reference_width_mm": 33.84,
       "visual_reference_status": "DETECTED",
       "distance_source_for_scale": "VISUAL_REFERENCE",
-      "distance_confidence": "HIGH"
+      "distance_confidence": "HIGH",
+      "reference_mode_enabled": true,
+      "manual_measurement_recommended": false
     },
     "coarse_hints": null
   },

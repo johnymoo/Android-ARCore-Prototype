@@ -16,6 +16,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import java.io.File
 
 class CaptureSessionWriterTest {
     @get:Rule val tmp = TemporaryFolder()
@@ -69,5 +70,15 @@ class CaptureSessionWriterTest {
         assertEquals("HIGH", frame["distance_confidence"].asString)
         assertEquals(true, frame["reference_mode_enabled"].asBoolean)
         assertEquals(false, frame["manual_measurement_recommended"].asBoolean)
+    }
+
+    @Test fun wizardUploadMetadataForwardsScaleTrustFlags() {
+        val source = listOf(
+            File("app/src/main/java/com/johnymoo/arverify/capture/CaptureWizardActivity.kt"),
+            File("src/main/java/com/johnymoo/arverify/capture/CaptureWizardActivity.kt"),
+        ).first { it.exists() }.readText()
+
+        assertTrue(source.contains("referenceModeEnabled = topScaleDistance.referenceModeEnabled"))
+        assertTrue(source.contains("manualMeasurementRecommended = topScaleDistance.manualMeasurementRecommended"))
     }
 }
