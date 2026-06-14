@@ -2,10 +2,18 @@
   "request_ar_metadata": {
     "device": {"model": "PLG110", "arcore": "1.54.260890493"},
     "recognition_frame": {
-      "image_intrinsics": {"fx": 1466.5, "fy": 1466.5, "cx": 960.0, "cy": 540.0, "width": 1920, "height": 1080},
+      "image_intrinsics": {"fx": 433.81, "fy": 433.81, "cx": 320.0, "cy": 240.0, "width": 640, "height": 480},
       "depth": {"width": 160, "height": 90, "format": "DEPTH16_MM"},
       "camera_pose": {"t": [0.01, -0.02, 0.30], "q": [0.0, 0.0, 0.0, 1.0]},
-      "distance_m": 0.25
+      "distance_m": 0.22584816,
+      "arcore_distance_m": 0.673,
+      "arcore_distance_source": "DEPTH",
+      "visual_distance_m": 0.22584816,
+      "visual_reference_width_px": 65.0,
+      "visual_reference_width_mm": 33.84,
+      "visual_reference_status": "DETECTED",
+      "distance_source_for_scale": "VISUAL_REFERENCE",
+      "distance_confidence": "HIGH"
     },
     "coarse_hints": null
   },
