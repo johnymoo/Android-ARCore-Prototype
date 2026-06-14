@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -59,7 +61,10 @@ fun CaptureScreen(
         }
 
         // Top chrome
-        Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.fillMaxWidth().statusBarsPadding().padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text("‹", color = androidx.compose.ui.graphics.Color.White,
                 modifier = Modifier.padding(end = 8.dp).clickableNoRipple(onBack))
             Text(stepText(state), color = androidx.compose.ui.graphics.Color.White, modifier = Modifier.weight(1f))
@@ -69,7 +74,8 @@ fun CaptureScreen(
 
         // Depth toggle chip (top-right, below chrome)
         Surface(color = androidx.compose.ui.graphics.Color(0x88000000), shape = MaterialTheme.shapes.large,
-            modifier = Modifier.align(Alignment.TopEnd).padding(top = 56.dp, end = 12.dp).clickableNoRipple { holder.toggleDepth() }) {
+            modifier = Modifier.align(Alignment.TopEnd).statusBarsPadding().padding(top = 56.dp, end = 12.dp)
+                .clickableNoRipple { holder.toggleDepth() }) {
             Text(if (state.depthOn) "深度 ● 开" else "深度 ○ 关", color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp))
         }
@@ -98,7 +104,7 @@ fun CaptureScreen(
         }
 
         // Bottom chrome: thumbnails + shutter + finish
-        Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
+        Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().navigationBarsPadding().padding(16.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             LazyRow(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                 items(state.frames) { f -> ThumbnailDot(f) }
